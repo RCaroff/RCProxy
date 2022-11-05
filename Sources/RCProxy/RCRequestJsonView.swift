@@ -37,7 +37,6 @@ class RCRequestJsonViewModel: ObservableObject {
     @Published var jsonBlock: JSONBlock = JSONBlock(id: UUID().uuidString)
 
     private var allLines: [JSONLine] = []
-    private var allBlocks: [JSONBlock] = []
 
     init(json: [String: Any]) {
         self.json = ["{ ... }": json]
@@ -91,8 +90,6 @@ class RCRequestJsonViewModel: ObservableObject {
             isExpandable: !block.subBlocks.isEmpty)
         )
 
-        allBlocks.append(block)
-
         return block
     }
 
@@ -109,7 +106,7 @@ class RCRequestJsonViewModel: ObservableObject {
     }
 
     func expand(blockId: String, at index: Int) {
-        var linesToAdd = allLines.filter {
+        let linesToAdd = allLines.filter {
             $0.parentBlockId == blockId
         }.sorted { line1, line2 in
             line1.indentLevel > line2.indentLevel
@@ -119,19 +116,21 @@ class RCRequestJsonViewModel: ObservableObject {
     }
 
     func collapse(blockId: String, parentBlock: JSONBlock? = nil) {
-        lines.removeAll(where: {
-            if $0.parentBlockId == blockId {
-                $0.isExpanded = false
-                return true
-            }
-            return false
-        })
-
-        if let selectedBlock = allBlocks.first(where: { $0.id == blockId }) {
-            (parentBlock ?? selectedBlock).subBlocks.forEach {
-                collapse(blockId: $0.id, parentBlock: $0)
+        guard let selectedLineIndex = lines.firstIndex(where: { $0.blockId == blockId }) else { return }
+        let selectedLine = lines[selectedLineIndex]
+        var indicesToRemove: IndexSet = []
+        for index in lines.indices {
+            guard index > selectedLineIndex else { continue }
+            let currentLine = lines[index]
+            if currentLine.indentLevel > selectedLine.indentLevel {
+                indicesToRemove.insert(index)
+                currentLine.isExpanded = false
+            } else {
+                break
             }
         }
+
+        lines.remove(atOffsets: indicesToRemove)
     }
 }
 
