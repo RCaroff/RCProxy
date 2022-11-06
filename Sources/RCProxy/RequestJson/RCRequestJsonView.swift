@@ -11,6 +11,13 @@ import SwiftUI
 struct RCRequestJsonView: View {
     @ObservedObject var viewModel: RCRequestJsonViewModel
 
+    var minimumRowHeight: CGFloat {
+        if UIDevice.current.userInterfaceIdiom == .tv {
+            return 1.0
+        }
+        return 48.0
+    }
+
     init(viewModel: RCRequestJsonViewModel) {
         self.viewModel = viewModel
     }
@@ -28,19 +35,33 @@ struct RCRequestJsonView: View {
             }
             .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 0))
         }
-        .environment(\.defaultMinListRowHeight, 1)
+        .environment(\.defaultMinListRowHeight, minimumRowHeight)
     }
 }
 
 struct JSONCell: View {
+
+    var padding: CGFloat {
+        if UIDevice.current.userInterfaceIdiom == .tv {
+            return 32
+        }
+        return 8
+    }
+
+    var fontSize: CGFloat {
+        if UIDevice.current.userInterfaceIdiom == .tv {
+            return 16
+        }
+        return 12
+    }
+
     @StateObject var line: JSONLine
     var tapAction: (Bool) -> Void
 
     var body: some View {
         Button {
             if line.isExpandable {
-                line.isExpanded.toggle()
-                tapAction(line.isExpanded)
+                tapAction(!line.isExpanded)
             }
         } label: {
             HStack {
@@ -51,10 +72,10 @@ struct JSONCell: View {
                 }
 
                 Text(line.value)
-                    .font(.system(size: 16))
+                    .font(.system(size: fontSize))
 
             }
-            .padding(.leading, 32*CGFloat(line.indentLevel))
+            .padding(.leading, padding*CGFloat(line.indentLevel))
         }
     }
 }

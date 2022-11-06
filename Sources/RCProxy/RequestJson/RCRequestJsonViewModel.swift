@@ -64,7 +64,7 @@ class RCRequestJsonViewModel: ObservableObject {
     private var allLines: [JSONLine] = []
 
     init(json: [String: Any]) {
-        jsonBlock = buildBlock(with: ["{ ... }": json], parentBlockId: nil, indentLevel: 0)
+        jsonBlock = buildBlock(with: ["{ ... }": json], parentBlockId: nil, indentLevel: -1)
         formatLines()
     }
 
@@ -130,6 +130,7 @@ class RCRequestJsonViewModel: ObservableObject {
     }
 
     func expand(blockId: String, at index: Int) {
+        lines[index].isExpanded = true
         let linesToAdd = allLines.filter {
             $0.parentBlockId == blockId
         }.sorted { line1, line2 in
@@ -142,6 +143,7 @@ class RCRequestJsonViewModel: ObservableObject {
     func collapse(blockId: String, parentBlock: JSONBlock? = nil) {
         guard let selectedLineIndex = lines.firstIndex(where: { $0.blockId == blockId }) else { return }
         let selectedLine = lines[selectedLineIndex]
+        selectedLine.isExpanded = false
         var indicesToRemove: IndexSet = []
         for index in lines.indices {
             guard index > selectedLineIndex else { continue }
