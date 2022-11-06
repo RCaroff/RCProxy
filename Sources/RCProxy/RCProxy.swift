@@ -14,7 +14,7 @@ public final class RCProxy {
     static let storage: RequestsStorage = SessionRequestsStorage()
 
     public static var viewController: UIViewController {
-        UIHostingController(rootView: RCProxyView(viewModel: RCProxyViewModel(storage: storage)))
+        UIHostingController(rootView: RCRequestsListView(viewModel: RCRequestsListViewModel(storage: storage)))
     }
 
     public static func start() {

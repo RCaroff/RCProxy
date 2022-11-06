@@ -6,8 +6,8 @@
 //
 import SwiftUI
 
-struct RCProxyView: View {
-    @ObservedObject var viewModel: RCProxyViewModel
+struct RCRequestsListView: View {
+    @ObservedObject var viewModel: RCRequestsListViewModel
 
     var body: some View {
         NavigationView {
@@ -56,10 +56,10 @@ struct StatusCodeBadgeView: View {
 
 struct RCProxyView_Previews: PreviewProvider {
     static var previews: some View {
-        let viewModel = RCProxyViewModel(storage: RCProxy.storage)
+        let viewModel = RCRequestsListViewModel(storage: RCProxy.storage)
         viewModel.items = [
             RequestItem(
-                url: "https://dev-api.fubo.tv/movies",
+                url: "https://swapi.dev/api/people",
                 requestHeaders: "x-access-token: fjdsbnobnzoge45e4gerg3",
                 requestBody: "",
                 responseHeaders: "x-country-code: US",
@@ -69,7 +69,7 @@ struct RCProxyView_Previews: PreviewProvider {
                 statusColor: .systemGreen
             ),
             RequestItem(
-                url: "https://dev-api.fubo.tv/movies",
+                url: "https://swapi.dev/api/people",
                 requestHeaders: "x-access-token: fjdsbnobnzoge45e4gerg3",
                 requestBody: "",
                 responseHeaders: "x-country-code: US",
@@ -79,7 +79,7 @@ struct RCProxyView_Previews: PreviewProvider {
                 statusColor: .systemRed
             )
         ]
-        return RCProxyView(viewModel: viewModel)
+        return RCRequestsListView(viewModel: viewModel)
             .preferredColorScheme(.dark)
     }
 }

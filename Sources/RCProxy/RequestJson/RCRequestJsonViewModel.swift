@@ -1,12 +1,11 @@
 //
-//  RCRequestJsonView.swift
-//  RCProxy
+//  File.swift
+//  
 //
-//  Created by Rémi Caroff on 31/10/2022.
+//  Created by Rémi Caroff on 06/11/2022.
 //
 
 import Foundation
-import SwiftUI
 
 class JSONBlock: ObservableObject, Identifiable {
     enum ValueType {
@@ -29,18 +28,43 @@ class JSONBlock: ObservableObject, Identifiable {
     }
 }
 
+class JSONLine: ObservableObject, Identifiable {
+    let id: UUID
+    let blockId: String
+    let parentBlockId: String?
+    let value: String
+    let collapsedValue: String
+    let indentLevel: Int
+    let isExpandable: Bool
+    @Published var isExpanded: Bool = false
+
+    internal init(
+        id: UUID,
+        blockId: String,
+        parentBlockId: String? = nil,
+        value: String,
+        indentLevel: Int,
+        isExpandable: Bool
+    ) {
+        self.id = id
+        self.blockId = blockId
+        self.parentBlockId = parentBlockId
+        self.value = value
+        self.indentLevel = indentLevel
+        self.collapsedValue = "{ ... }"
+        self.isExpandable = isExpandable
+    }
+}
+
 class RCRequestJsonViewModel: ObservableObject {
 
-    var json: [String: Any]
-
     @Published var lines: [JSONLine] = []
-    @Published var jsonBlock: JSONBlock = JSONBlock(id: UUID().uuidString)
 
+    private var jsonBlock: JSONBlock = JSONBlock(id: UUID().uuidString)
     private var allLines: [JSONLine] = []
 
     init(json: [String: Any]) {
-        self.json = ["{ ... }": json]
-        jsonBlock = buildBlock(with: self.json, parentBlockId: nil, indentLevel: 0)
+        jsonBlock = buildBlock(with: ["{ ... }": json], parentBlockId: nil, indentLevel: 0)
         formatLines()
     }
 
@@ -131,56 +155,5 @@ class RCRequestJsonViewModel: ObservableObject {
         }
 
         lines.remove(atOffsets: indicesToRemove)
-    }
-}
-
-struct RCRequestJsonView: View {
-    @ObservedObject var viewModel: RCRequestJsonViewModel
-
-    init(viewModel: RCRequestJsonViewModel) {
-        self.viewModel = viewModel
-    }
-
-    var body: some View {
-        List {
-            ForEach(Array(viewModel.lines.enumerated()), id: \.element.id) { index, line in
-                JSONCell(line: line) { [line, index] isExpanded in
-                    if isExpanded {
-                        viewModel.expand(blockId: line.blockId, at: index)
-                    } else {
-                        viewModel.collapse(blockId: line.blockId)
-                    }
-                }
-            }
-            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 0))
-        }
-        .environment(\.defaultMinListRowHeight, 1)
-    }
-}
-
-struct JSONCell: View {
-    @StateObject var line: JSONLine
-    var tapAction: (Bool) -> Void
-
-    var body: some View {
-        Button {
-            if line.isExpandable {
-                line.isExpanded.toggle()
-                tapAction(line.isExpanded)
-            }
-        } label: {
-            HStack {
-                if line.isExpandable {
-                    Text(line.isExpanded ? "▼" : "▶︎")
-                } else {
-                    Text("•")
-                }
-
-                Text(line.value)
-                    .font(.system(size: 16))
-
-            }
-            .padding(.leading, 32*CGFloat(line.indentLevel))
-        }
     }
 }

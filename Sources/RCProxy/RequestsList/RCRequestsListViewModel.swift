@@ -17,36 +17,9 @@ struct RequestItem: Identifiable {
     var responseBodyJson: [String: Any]
     let statusCode: String
     let statusColor: UIColor
-
-    var responseBodyLines: [JSONLine] {
-        responseBody.components(separatedBy: "\n").enumerated().map { (index, element) in
-            JSONLine(id: UUID(), blockId: UUID().uuidString, value: element, indentLevel: 0, isExpandable: true)
-        }
-    }
 }
 
-class JSONLine: ObservableObject, Identifiable {
-    let id: UUID
-    let blockId: String
-    let parentBlockId: String?
-    let value: String
-    let collapsedValue: String
-    let indentLevel: Int
-    let isExpandable: Bool
-    @Published var isExpanded: Bool = false
-
-    internal init(id: UUID, blockId: String, parentBlockId: String? = nil, value: String, indentLevel: Int, isExpandable: Bool) {
-        self.id = id
-        self.blockId = blockId
-        self.parentBlockId = parentBlockId
-        self.value = value
-        self.indentLevel = indentLevel
-        self.collapsedValue = "{ ... }"
-        self.isExpandable = isExpandable
-    }
-}
-
-final class RCProxyViewModel: ObservableObject {
+final class RCRequestsListViewModel: ObservableObject {
 
     var storage: RequestsStorage
 
