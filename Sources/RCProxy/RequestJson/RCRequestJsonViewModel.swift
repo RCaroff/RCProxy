@@ -64,11 +64,45 @@ class RCRequestJsonViewModel: ObservableObject {
     private var allLines: [JSONLine] = []
 
     init(json: [String: Any]) {
-        jsonBlock = buildBlock(with: ["{ ... }": json], parentBlockId: nil, indentLevel: -1)
-        formatLines()
+        if json.isEmpty {
+            lines = [JSONLine(id: UUID(), blockId: "", value: "No content", indentLevel: 0, isExpandable: false)]
+        } else {
+            jsonBlock = buildBlock(with: ["{ ... }": json], parentBlockId: nil, indentLevel: -1)
+            formatLines()
+        }
     }
 
-    func buildBlock(with json: [String: Any], parentBlockId: String?, indentLevel: Int) -> JSONBlock {
+    func expand(blockId: String, at index: Int) {
+        lines[index].isExpanded = true
+        let linesToAdd = allLines.filter {
+            $0.parentBlockId == blockId
+        }.sorted { line1, line2 in
+            line1.indentLevel > line2.indentLevel
+        }
+
+        lines.insert(contentsOf: linesToAdd, at: index+1)
+    }
+
+    func collapse(blockId: String, parentBlock: JSONBlock? = nil) {
+        guard let selectedLineIndex = lines.firstIndex(where: { $0.blockId == blockId }) else { return }
+        let selectedLine = lines[selectedLineIndex]
+        selectedLine.isExpanded = false
+        var indicesToRemove: IndexSet = []
+        for index in lines.indices {
+            guard index > selectedLineIndex else { continue }
+            let currentLine = lines[index]
+            if currentLine.indentLevel > selectedLine.indentLevel {
+                indicesToRemove.insert(index)
+                currentLine.isExpanded = false
+            } else {
+                break
+            }
+        }
+
+        lines.remove(atOffsets: indicesToRemove)
+    }
+
+    private func buildBlock(with json: [String: Any], parentBlockId: String?, indentLevel: Int) -> JSONBlock {
         let block = JSONBlock(id: UUID().uuidString)
         json.forEach { (key, value) in
             if let value = value as? [String: Any] {
@@ -117,7 +151,7 @@ class RCRequestJsonViewModel: ObservableObject {
         return block
     }
 
-    func formatLines() {
+    private func formatLines() {
         lines = jsonBlock.subBlocks.map({ block in
             JSONLine(
                 id: UUID(),
@@ -127,35 +161,5 @@ class RCRequestJsonViewModel: ObservableObject {
                 isExpandable: !block.subBlocks.isEmpty
             )
         })
-    }
-
-    func expand(blockId: String, at index: Int) {
-        lines[index].isExpanded = true
-        let linesToAdd = allLines.filter {
-            $0.parentBlockId == blockId
-        }.sorted { line1, line2 in
-            line1.indentLevel > line2.indentLevel
-        }
-
-        lines.insert(contentsOf: linesToAdd, at: index+1)
-    }
-
-    func collapse(blockId: String, parentBlock: JSONBlock? = nil) {
-        guard let selectedLineIndex = lines.firstIndex(where: { $0.blockId == blockId }) else { return }
-        let selectedLine = lines[selectedLineIndex]
-        selectedLine.isExpanded = false
-        var indicesToRemove: IndexSet = []
-        for index in lines.indices {
-            guard index > selectedLineIndex else { continue }
-            let currentLine = lines[index]
-            if currentLine.indentLevel > selectedLine.indentLevel {
-                indicesToRemove.insert(index)
-                currentLine.isExpanded = false
-            } else {
-                break
-            }
-        }
-
-        lines.remove(atOffsets: indicesToRemove)
     }
 }

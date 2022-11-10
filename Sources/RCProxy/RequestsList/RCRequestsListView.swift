@@ -41,7 +41,7 @@ struct RCProxyRequestItemCell: View {
             showDetails = true
         } label: {
             ZStack {
-                HStack {
+                HStack(spacing: isTV ? 24 : 8) {
                     StatusCodeBadgeView(code: item.statusCode, color: item.statusColor)
                     Text(item.url)
                         .font(.system(size: fontSize))

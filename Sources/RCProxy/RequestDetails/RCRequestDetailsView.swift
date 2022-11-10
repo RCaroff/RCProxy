@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-
-
 struct RCRequestDetailsView: View {
 
     let item: RequestItem
@@ -16,7 +14,7 @@ struct RCRequestDetailsView: View {
     var body: some View {
 
         List {
-            HStack(spacing: 8) {
+            HStack(spacing: isTV ? 24 : 8) {
                 StatusCodeBadgeView(code: item.statusCode, color: item.statusColor)
                 Text(item.url)
                     .font(.system(size: isTV ? 32 : 14, weight: .regular))
