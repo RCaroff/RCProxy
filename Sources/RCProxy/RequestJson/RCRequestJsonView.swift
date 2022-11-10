@@ -12,7 +12,7 @@ struct RCRequestJsonView: View {
     @ObservedObject var viewModel: RCRequestJsonViewModel
 
     var minimumRowHeight: CGFloat {
-        if UIDevice.current.userInterfaceIdiom == .tv {
+        if isTV {
             return 1.0
         }
         return 48.0
@@ -42,14 +42,14 @@ struct RCRequestJsonView: View {
 struct JSONCell: View {
 
     var padding: CGFloat {
-        if UIDevice.current.userInterfaceIdiom == .tv {
+        if isTV {
             return 32
         }
         return 8
     }
 
     var fontSize: CGFloat {
-        if UIDevice.current.userInterfaceIdiom == .tv {
+        if isTV {
             return 16
         }
         return 12

@@ -6,6 +6,10 @@
 //
 import SwiftUI
 
+var isTV: Bool {
+    UIDevice.current.userInterfaceIdiom == .tv
+}
+
 struct RCRequestsListView: View {
     @ObservedObject var viewModel: RCRequestsListViewModel
 
@@ -24,8 +28,8 @@ struct RCProxyRequestItemCell: View {
     let item: RequestItem
 
     var fontSize: CGFloat {
-        if UIDevice.current.userInterfaceIdiom == .tv {
-            return 16
+        if isTV {
+            return 24
         }
         return 14
     }

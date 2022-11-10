@@ -7,7 +7,10 @@
 
 import SwiftUI
 
+
+
 struct RCRequestDetailsView: View {
+
     let item: RequestItem
 
     var body: some View {
@@ -16,7 +19,7 @@ struct RCRequestDetailsView: View {
             HStack(spacing: 8) {
                 StatusCodeBadgeView(code: item.statusCode, color: item.statusColor)
                 Text(item.url)
-                    .font(.system(size: 14, weight: .regular))
+                    .font(.system(size: isTV ? 32 : 14, weight: .regular))
             }
 
             Section {
@@ -24,17 +27,17 @@ struct RCRequestDetailsView: View {
                     RCRequestJsonView(viewModel: RCRequestJsonViewModel(json: item.requestHeaders))
                 } label: {
                     Text("Headers")
-                        .font(.system(size: 16, weight: .regular))
+                        .font(.system(size: isTV ? 24 : 16, weight: .regular))
                 }
                 NavigationLink {
                     RCRequestJsonView(viewModel: RCRequestJsonViewModel(json: item.requestBodyJson))
                 } label: {
                     Text("Body")
-                        .font(.system(size: 16, weight: .regular))
+                        .font(.system(size: isTV ? 24 : 16, weight: .regular))
                 }
             } header: {
                 Text("⬆️ Request")
-                    .font(.system(size: 20, weight: .bold))
+                    .font(.system(size: isTV ? 32 : 20, weight: .bold))
                     .padding()
             }
 
@@ -43,18 +46,18 @@ struct RCRequestDetailsView: View {
                     RCRequestJsonView(viewModel: RCRequestJsonViewModel(json: item.responseHeaders))
                 } label: {
                     Text("Headers")
-                        .font(.system(size: 16, weight: .regular))
+                        .font(.system(size: isTV ? 24 : 16, weight: .regular))
                 }
 
                 NavigationLink {
                     RCRequestJsonView(viewModel: RCRequestJsonViewModel(json: item.responseBodyJson))
                 } label: {
                     Text("Body")
-                        .font(.system(size: 16, weight: .regular))
+                        .font(.system(size: isTV ? 24 : 16, weight: .regular))
                 }
             } header: {
                 Text("⬇️ Response")
-                    .font(.system(size: 20, weight: .bold))
+                    .font(.system(size: isTV ? 32 : 20, weight: .bold))
                     .padding()
             }
         }
