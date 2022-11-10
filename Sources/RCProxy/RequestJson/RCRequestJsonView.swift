@@ -73,6 +73,7 @@ struct JSONCell: View {
 
                 Text(line.value)
                     .font(.system(size: fontSize))
+                    .padding(.init(top: 8, leading: 0, bottom: 8, trailing: 0))
 
             }
             .padding(.leading, padding*CGFloat(line.indentLevel))

@@ -23,6 +23,13 @@ struct RCRequestsListView: View {
 struct RCProxyRequestItemCell: View {
     let item: RequestItem
 
+    var fontSize: CGFloat {
+        if UIDevice.current.userInterfaceIdiom == .tv {
+            return 16
+        }
+        return 14
+    }
+
     @State private var showDetails: Bool = false
 
     var body: some View {
@@ -33,7 +40,7 @@ struct RCProxyRequestItemCell: View {
                 HStack {
                     StatusCodeBadgeView(code: item.statusCode, color: item.statusColor)
                     Text(item.url)
-                        .font(.body)
+                        .font(.system(size: fontSize))
                     Spacer()
                 }
                 NavigationLink("", destination: RCRequestDetailsView(item: item), isActive: $showDetails)
@@ -60,9 +67,10 @@ struct RCProxyView_Previews: PreviewProvider {
         viewModel.items = [
             RequestItem(
                 url: "https://swapi.dev/api/people",
-                requestHeaders: "x-access-token: fjdsbnobnzoge45e4gerg3",
+                requestHeaders: ["x-access-token": "fjdsbnobnzoge45e4gerg3"],
                 requestBody: "",
-                responseHeaders: "x-country-code: US",
+                requestBodyJson: [:],
+                responseHeaders: ["x-country-code": "US"],
                 responseBody: "{}",
                 responseBodyJson: [:],
                 statusCode: "200",
@@ -70,9 +78,10 @@ struct RCProxyView_Previews: PreviewProvider {
             ),
             RequestItem(
                 url: "https://swapi.dev/api/people",
-                requestHeaders: "x-access-token: fjdsbnobnzoge45e4gerg3",
+                requestHeaders: ["x-access-token": "fjdsbnobnzoge45e4gerg3"],
                 requestBody: "",
-                responseHeaders: "x-country-code: US",
+                requestBodyJson: [:],
+                responseHeaders: ["x-country-code": "US"],
                 responseBody: "{}",
                 responseBodyJson: [:],
                 statusCode: "400",

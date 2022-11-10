@@ -10,9 +10,10 @@ import SwiftUI
 struct RequestItem: Identifiable {
     let id = UUID()
     let url: String
-    let requestHeaders: String
+    let requestHeaders: [String: Any]
     let requestBody: String
-    let responseHeaders: String
+    var requestBodyJson: [String: Any]
+    let responseHeaders: [String: Any]
     let responseBody: String
     var responseBodyJson: [String: Any]
     let statusCode: String
@@ -34,19 +35,11 @@ final class RCRequestsListViewModel: ObservableObject {
         items = []
         storage.requests.forEach({ request, date in
             let urlString = request.url?.absoluteString ?? "No URL"
-            let requestHeaders = map(headers: (request.allHTTPHeaderFields ?? [:]))
-                .description
-                .replacingOccurrences(of: ", ", with: "\n")
-                .replacingOccurrences(of: "[", with: "")
-                .replacingOccurrences(of: "]", with: "")
             let requestBody = request.httpBody.toJSON()
+            let requestBodyJson =  request.httpBody.toJSONObject()
             let response = storage.responses[request]?.0 as? HTTPURLResponse
+
             let responseData = storage.responses[request]?.1
-            let responseHeaders = response?.allHeaderFields
-                .description
-                .replacingOccurrences(of: ", ", with: "\n")
-                .replacingOccurrences(of: "[", with: "")
-                .replacingOccurrences(of: "]", with: "")
             let responseBody = responseData?.toJSON() ?? "No content"
             let responseBodyJson =  responseData?.toJSONObject() ?? [:]
             let statusCode = response?.statusCode ?? 0
@@ -54,9 +47,10 @@ final class RCRequestsListViewModel: ObservableObject {
 
             let item = RequestItem(
                 url: urlString,
-                requestHeaders: requestHeaders,
+                requestHeaders: request.allHTTPHeaderFields ?? ["No":"Content"],
                 requestBody: requestBody,
-                responseHeaders: responseHeaders ?? "No Content",
+                requestBodyJson: requestBodyJson,
+                responseHeaders: (response?.allHeaderFields as? [String: Any]) ?? ["No":"Content"],
                 responseBody: responseBody,
                 responseBodyJson: responseBodyJson,
                 statusCode: "\(statusCode)",
