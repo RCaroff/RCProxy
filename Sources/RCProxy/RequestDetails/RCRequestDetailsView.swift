@@ -19,6 +19,7 @@ struct RCRequestDetailsView: View {
                 Text(item.url)
                     .font(.system(size: isTV ? 32 : 14, weight: .regular))
             }
+            .padding(4)
 
             Section {
                 NavigationLink {
@@ -61,6 +62,7 @@ struct RCRequestDetailsView: View {
         }
         .padding(8)
         .frame(maxWidth: .infinity)
+        .navigationTitle(URL(string: item.url)?.relativePath ?? "")
     }
 }
 

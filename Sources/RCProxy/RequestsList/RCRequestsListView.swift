@@ -14,13 +14,30 @@ struct RCRequestsListView: View {
     @ObservedObject var viewModel: RCRequestsListViewModel
 
     var body: some View {
-        NavigationView {
-            List {
-                ForEach(viewModel.items) { item in
-                    RCProxyRequestItemCell(item: item)
+        if #available(iOS 16.0, *) {
+            NavigationStack {
+                List {
+                    ForEach(viewModel.items) { item in
+                        RCProxyRequestItemCell(item: item)
+                    }
                 }
+                .navigationTitle("Requests")
             }
+            .navigationBarTitleDisplayMode(.large)
+        } else {
+            NavigationView {
+                List {
+                    ForEach(viewModel.items) { item in
+                        RCProxyRequestItemCell(item: item)
+                    }
+                }
+                .navigationTitle("Requests")
+            }
+            .navigationViewStyle(.stack)
+            .navigationBarTitleDisplayMode(.large)
+
         }
+
     }
 }
 
@@ -50,6 +67,7 @@ struct RCProxyRequestItemCell: View {
                 NavigationLink("", destination: RCRequestDetailsView(item: item), isActive: $showDetails)
             }
         }
+        .padding(4)
     }
 }
 
