@@ -36,9 +36,11 @@ struct Toast: ViewModifier {
                 }
                 .background(config.backgroundColor)
                 .cornerRadius(8)
+                #if os(iOS)
                 .onTapGesture {
                     isShowing = false
                 }
+                #endif
                 .onAppear {
                     DispatchQueue.main.asyncAfter(deadline: .now() + config.duration) {
                         isShowing = false

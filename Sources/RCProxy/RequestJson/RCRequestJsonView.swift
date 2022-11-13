@@ -33,8 +33,10 @@ struct RCRequestJsonView: View {
                         viewModel.collapse(blockId: line.blockId)
                     }
                 } longPressAction: {
+                    #if os(iOS)
                     UIPasteboard.general.string = line.value
                     showCopiedToast = true
+                    #endif
                 }
             }
             .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 0))
@@ -84,11 +86,13 @@ struct JSONCell: View {
             }
             .padding(.leading, padding*CGFloat(line.indentLevel))
         }
+        #if os(iOS)
         .onTapGesture {
             if line.isExpandable {
                 tapAction(!line.isExpanded)
             }
         }
         .onLongPressGesture { longPressAction() }
+        #endif
     }
 }

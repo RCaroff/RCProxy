@@ -14,7 +14,7 @@ struct RCRequestsListView: View {
     @ObservedObject var viewModel: RCRequestsListViewModel
 
     var body: some View {
-        if #available(iOS 16.0, *) {
+        if #available(iOS 16.0, tvOS 16.0, *) {
             NavigationStack {
                 List {
                     ForEach(viewModel.items) { item in
@@ -23,7 +23,9 @@ struct RCRequestsListView: View {
                 }
                 .navigationTitle("Requests")
             }
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.large)
+            #endif
         } else {
             NavigationView {
                 List {
@@ -34,8 +36,9 @@ struct RCRequestsListView: View {
                 .navigationTitle("Requests")
             }
             .navigationViewStyle(.stack)
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.large)
-
+            #endif
         }
 
     }
