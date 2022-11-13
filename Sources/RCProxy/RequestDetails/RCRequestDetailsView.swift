@@ -9,6 +9,8 @@ import SwiftUI
 
 struct RCRequestDetailsView: View {
 
+    @State var isSharing: Bool = false
+
     let item: RequestItem
 
     var body: some View {
@@ -23,13 +25,19 @@ struct RCRequestDetailsView: View {
 
             Section {
                 NavigationLink {
-                    RCRequestJsonView(viewModel: RCRequestJsonViewModel(json: item.requestHeaders))
+                    RCRequestJsonView(viewModel: RCRequestJsonViewModel(
+                        json: item.requestHeaders,
+                        prettyJson: item.requestHeaders.prettyfiedHeaders()
+                    ))
                 } label: {
                     Text("Headers")
                         .font(.system(size: isTV ? 24 : 16, weight: .regular))
                 }
                 NavigationLink {
-                    RCRequestJsonView(viewModel: RCRequestJsonViewModel(json: item.requestBodyJson))
+                    RCRequestJsonView(viewModel: RCRequestJsonViewModel(
+                        json: item.requestBodyJson,
+                        prettyJson: item.requestBody
+                    ))
                 } label: {
                     Text("Body")
                         .font(.system(size: isTV ? 24 : 16, weight: .regular))
@@ -42,14 +50,20 @@ struct RCRequestDetailsView: View {
 
             Section {
                 NavigationLink {
-                    RCRequestJsonView(viewModel: RCRequestJsonViewModel(json: item.responseHeaders))
+                    RCRequestJsonView(viewModel: RCRequestJsonViewModel(
+                        json: item.responseHeaders,
+                        prettyJson: item.responseHeaders.prettyfiedHeaders()
+                    ))
                 } label: {
                     Text("Headers")
                         .font(.system(size: isTV ? 24 : 16, weight: .regular))
                 }
 
                 NavigationLink {
-                    RCRequestJsonView(viewModel: RCRequestJsonViewModel(json: item.responseBodyJson))
+                    RCRequestJsonView(viewModel: RCRequestJsonViewModel(
+                        json: item.responseBodyJson,
+                        prettyJson: item.responseBody
+                    ))
                 } label: {
                     Text("Body")
                         .font(.system(size: isTV ? 24 : 16, weight: .regular))
@@ -63,6 +77,21 @@ struct RCRequestDetailsView: View {
         .padding(8)
         .frame(maxWidth: .infinity)
         .navigationTitle(URL(string: item.url)?.relativePath ?? "")
+        #if os(iOS)
+        .toolbar {
+            Button(action: {
+                isSharing = true
+            }, label: {
+                Image(systemName: "square.and.arrow.up")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 24, height: 24)
+            })
+        }
+        .sheet(isPresented: $isSharing, content: {
+            ShareSheetView(activityItems: [item.cURL])
+        })
+        #endif
     }
 }
 
@@ -77,7 +106,8 @@ struct RCRequestDetailsView_Previews: PreviewProvider {
             responseBody: "{}",
             responseBodyJson: [:],
             statusCode: "400",
-            statusColor: .systemRed
+            statusColor: .systemRed,
+            cURL: ""
         ))
     }
 }

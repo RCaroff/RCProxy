@@ -39,7 +39,7 @@ class RCProxyProtocol: URLProtocol {
             }
             self.client?.urlProtocolDidFinishLoading(self)
             if let response = response {
-                RCProxy.storage.store(response: response, data: data, for: self.request)
+                RCProxy.storage.store(responseData: (response, data), for: self.request)
             }
         })
         dataTask?.resume()

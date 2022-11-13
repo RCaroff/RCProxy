@@ -11,6 +11,7 @@ import SwiftUI
 struct RCRequestJsonView: View {
     @ObservedObject var viewModel: RCRequestJsonViewModel
     @State var showCopiedToast: Bool = false
+    @State var isSharing: Bool = false
 
     var minimumRowHeight: CGFloat {
         if isTV {
@@ -43,6 +44,23 @@ struct RCRequestJsonView: View {
         }
         .environment(\.defaultMinListRowHeight, minimumRowHeight)
         .toast(message: "Copied!", isShowing: $showCopiedToast, duration: Toast.short)
+#if os(iOS)
+        .toolbar {
+            Button(action: {
+                isSharing = true
+            }, label: {
+                Image(systemName: "square.and.arrow.up")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 24, height: 24)
+            })
+        }
+        .sheet(isPresented: $isSharing, content: {
+            if let url = viewModel.prettyJson.toJSONFile(withName: "response") {
+                ShareSheetView(activityItems: [url])
+            }
+        })
+#endif
     }
 }
 

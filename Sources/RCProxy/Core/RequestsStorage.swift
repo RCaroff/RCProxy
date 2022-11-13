@@ -8,25 +8,26 @@
 import Foundation
 
 typealias RequestData = (urlRequest: URLRequest, date: Date)
+typealias ResponseData = (urlResponse: URLResponse, data: Data?)
 
 protocol RequestsStorage {
     var requests: [RequestData] { get }
-    var responses: [URLRequest: (URLResponse, Data?)] { get }
+    var responses: [URLRequest: ResponseData] { get }
     func store(request: RequestData)
-    func store(response: URLResponse, data: Data?, for urlRequest: URLRequest)
+    func store(responseData: ResponseData, for urlRequest: URLRequest)
 }
 
 final class SessionRequestsStorage: RequestsStorage {
 
     var requests: [RequestData] = []
-    var responses: [URLRequest: (URLResponse, Data?)] = [:]
+    var responses: [URLRequest: ResponseData] = [:]
 
     func store(request: RequestData) {
         requests.append(request)
         requests.sort(by: { $0.date > $1.date })
     }
 
-    func store(response: URLResponse, data: Data?, for urlRequest: URLRequest) {
-        responses.updateValue((response, data), forKey: urlRequest)
+    func store(responseData: ResponseData, for urlRequest: URLRequest) {
+        responses.updateValue(responseData, forKey: urlRequest)
     }
 }

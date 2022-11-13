@@ -59,16 +59,21 @@ class JSONLine: ObservableObject, Identifiable {
 class RCRequestJsonViewModel: ObservableObject {
 
     @Published var lines: [JSONLine] = []
+    var prettyJson: String = "No Content"
 
     private var jsonBlock: JSONBlock = JSONBlock(id: UUID().uuidString)
     private var allLines: [JSONLine] = []
 
-    init(json: [String: Any]) {
+    init(json: [String: Any], prettyJson: String? = nil) {
         if json.isEmpty {
             lines = [JSONLine(id: UUID(), blockId: "", value: "No content", indentLevel: 0, isExpandable: false)]
         } else {
             jsonBlock = buildBlock(with: ["{ ... }": json], parentBlockId: nil, indentLevel: -1)
             formatLines()
+        }
+
+        if let prettyJson {
+            self.prettyJson = prettyJson
         }
     }
 

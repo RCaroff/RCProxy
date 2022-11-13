@@ -10,14 +10,15 @@ import SwiftUI
 struct RequestItem: Identifiable {
     let id = UUID()
     let url: String
-    let requestHeaders: [String: Any]
+    let requestHeaders: [String: String]
     let requestBody: String
     var requestBodyJson: [String: Any]
-    let responseHeaders: [String: Any]
+    let responseHeaders: [String: String]
     let responseBody: String
     var responseBodyJson: [String: Any]
     let statusCode: String
     let statusColor: UIColor
+    let cURL: String
 }
 
 final class RCRequestsListViewModel: ObservableObject {
@@ -34,6 +35,7 @@ final class RCRequestsListViewModel: ObservableObject {
     func fetch() {
         items = []
         storage.requests.forEach({ request, date in
+            let cURL = request.cURL()
             let urlString = request.url?.absoluteString ?? "No URL"
             let requestBody = request.httpBody.toJSON()
             let requestBodyJson =  request.httpBody.toJSONObject()
@@ -56,11 +58,12 @@ final class RCRequestsListViewModel: ObservableObject {
                 requestHeaders: request.allHTTPHeaderFields ?? ["No":"Content"],
                 requestBody: requestBody,
                 requestBodyJson: requestBodyJson,
-                responseHeaders: (response?.allHeaderFields as? [String: Any]) ?? ["No":"Content"],
+                responseHeaders: (response?.allHeaderFields as? [String: String]) ?? ["No":"Content"],
                 responseBody: responseBody,
                 responseBodyJson: responseBodyJson,
                 statusCode: "\(statusCode)",
-                statusColor: statusColor
+                statusColor: statusColor,
+                cURL: cURL
             )
 
             items.append(item)
@@ -71,46 +74,5 @@ final class RCRequestsListViewModel: ObservableObject {
         return Dictionary(uniqueKeysWithValues: headers.map({ key, value in
             ("\(key)", "\(value)")
         }))
-    }
-}
-
-extension Optional where Wrapped == Data {
-    func toJSON() -> String {
-        switch self {
-        case .none:
-            return "No content"
-        case .some(let data):
-            return data.toJSON()
-        }
-    }
-
-    func toJSONObject() -> [String: Any] {
-        switch self {
-        case .none:
-            return [:]
-        case .some(let data):
-            return data.toJSONObject()
-        }
-    }
-}
-
-extension Data {
-    func toJSON() -> String {
-        do {
-            let jsonObject: AnyObject = try JSONSerialization.jsonObject(with: self) as AnyObject
-            let jsonData = try JSONSerialization.data(withJSONObject: jsonObject, options: .prettyPrinted)
-            return String(data: jsonData, encoding: .utf8) ?? "No content"
-        } catch {
-            return "No content"
-        }
-    }
-
-    func toJSONObject() -> [String: Any] {
-        do {
-            let jsonObject: Dictionary<String, Any>? = try JSONSerialization.jsonObject(with: self) as? Dictionary<String, Any>
-            return jsonObject ?? [:]
-        } catch {
-            return [:]
-        }
     }
 }

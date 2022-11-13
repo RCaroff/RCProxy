@@ -99,7 +99,8 @@ struct RCProxyView_Previews: PreviewProvider {
                 responseBody: "{}",
                 responseBodyJson: [:],
                 statusCode: "200",
-                statusColor: .systemGreen
+                statusColor: .systemGreen,
+                cURL: ""
             ),
             RequestItem(
                 url: "https://swapi.dev/api/people",
@@ -110,7 +111,8 @@ struct RCProxyView_Previews: PreviewProvider {
                 responseBody: "{}",
                 responseBodyJson: [:],
                 statusCode: "400",
-                statusColor: .systemRed
+                statusColor: .systemRed,
+                cURL: ""
             )
         ]
         return RCRequestsListView(viewModel: viewModel)
