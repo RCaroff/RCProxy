@@ -43,7 +43,13 @@ final class RCRequestsListViewModel: ObservableObject {
             let responseBody = responseData?.toJSON() ?? "No content"
             let responseBodyJson =  responseData?.toJSONObject() ?? [:]
             let statusCode = response?.statusCode ?? 0
-            let statusColor: UIColor = statusCode >= 400 ? .systemRed : .systemGreen
+            var statusColor: UIColor = statusCode >= 400 ? .systemRed : .systemGreen
+            if (300...399) ~= statusCode {
+                statusColor = .systemMint
+            }
+            if statusCode == 0 {
+                statusColor = .black
+            }
 
             let item = RequestItem(
                 url: urlString,

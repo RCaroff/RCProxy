@@ -10,6 +10,7 @@ import SwiftUI
 
 struct RCRequestJsonView: View {
     @ObservedObject var viewModel: RCRequestJsonViewModel
+    @State var showCopiedToast: Bool = false
 
     var minimumRowHeight: CGFloat {
         if isTV {
@@ -31,11 +32,15 @@ struct RCRequestJsonView: View {
                     } else {
                         viewModel.collapse(blockId: line.blockId)
                     }
+                } longPressAction: {
+                    UIPasteboard.general.string = line.value
+                    showCopiedToast = true
                 }
             }
             .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 0))
         }
         .environment(\.defaultMinListRowHeight, minimumRowHeight)
+        .toast(message: "Copied!", isShowing: $showCopiedToast, duration: Toast.short)
     }
 }
 
@@ -57,6 +62,7 @@ struct JSONCell: View {
 
     @StateObject var line: JSONLine
     var tapAction: (Bool) -> Void
+    var longPressAction: () -> Void
 
     var body: some View {
         Button {
@@ -78,5 +84,11 @@ struct JSONCell: View {
             }
             .padding(.leading, padding*CGFloat(line.indentLevel))
         }
+        .onTapGesture {
+            if line.isExpandable {
+                tapAction(!line.isExpanded)
+            }
+        }
+        .onLongPressGesture { longPressAction() }
     }
 }
