@@ -8,16 +8,9 @@
 import Foundation
 
 class JSONBlock: ObservableObject, Identifiable {
-    enum ValueType {
-        case array
-        case object
-        case simple
-    }
-
     var id: String
     var text: String = "{}"
     var isExpanded: Bool = false
-    var type: ValueType = .simple
     var subBlocks: [JSONBlock] = []
     var isExpandable: Bool {
         return !subBlocks.isEmpty
@@ -33,7 +26,6 @@ class JSONLine: ObservableObject, Identifiable {
     let blockId: String
     let parentBlockId: String?
     let value: String
-    let collapsedValue: String
     let indentLevel: Int
     let isExpandable: Bool
     @Published var isExpanded: Bool = false
@@ -51,7 +43,6 @@ class JSONLine: ObservableObject, Identifiable {
         self.parentBlockId = parentBlockId
         self.value = value
         self.indentLevel = indentLevel
-        self.collapsedValue = "{ ... }"
         self.isExpandable = isExpandable
     }
 }
@@ -88,7 +79,7 @@ class RCRequestJsonViewModel: ObservableObject {
         lines.insert(contentsOf: linesToAdd, at: index+1)
     }
 
-    func collapse(blockId: String, parentBlock: JSONBlock? = nil) {
+    func collapse(blockId: String) {
         guard let selectedLineIndex = lines.firstIndex(where: { $0.blockId == blockId }) else { return }
         let selectedLine = lines[selectedLineIndex]
         selectedLine.isExpanded = false
@@ -122,11 +113,8 @@ class RCRequestJsonViewModel: ObservableObject {
                 }
 
                 block.text = "\"\(key)\": {"
-                block.type = .object
 
             } else if let value = value as? [[String: Any]] {
-                block.type = .array
-
                 value.enumerated().forEach {
                     block.subBlocks.append(
                         buildBlock(
@@ -139,7 +127,6 @@ class RCRequestJsonViewModel: ObservableObject {
                 block.text = "\"\(key)\": [ \(value.count) elements ]"
 
             } else {
-                block.type = .simple
                 block.text = "\"\(key)\": \(value)"
             }
         }
