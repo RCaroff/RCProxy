@@ -1,5 +1,6 @@
 import XCTest
 @testable import RCProxy
+import Foundation
 
 final class RCProxyTests: XCTestCase {
     func testExample() throws {
