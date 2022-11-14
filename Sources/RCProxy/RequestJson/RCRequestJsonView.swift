@@ -56,7 +56,7 @@ struct RCRequestJsonView: View {
             })
         }
         .sheet(isPresented: $isSharing, content: {
-            if let url = viewModel.prettyJson.toJSONFile(withName: "response") {
+            if let url = viewModel.prettyJson.toJSONFile(withName: viewModel.jsonTitle) {
                 ShareSheetView(activityItems: [url])
             }
         })

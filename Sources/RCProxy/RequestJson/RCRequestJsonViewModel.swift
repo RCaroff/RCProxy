@@ -51,11 +51,13 @@ class RCRequestJsonViewModel: ObservableObject {
 
     @Published var lines: [JSONLine] = []
     var prettyJson: String = "No Content"
+    var jsonTitle: String
 
     private var jsonBlock: JSONBlock = JSONBlock(id: UUID().uuidString)
     private var allLines: [JSONLine] = []
 
-    init(json: [String: Any], prettyJson: String? = nil) {
+    init(json: [String: Any], prettyJson: String? = nil, jsonTitle: String) {
+        self.jsonTitle = jsonTitle
         if json.isEmpty {
             lines = [JSONLine(id: UUID(), blockId: "", value: "No content", indentLevel: 0, isExpandable: false)]
         } else {

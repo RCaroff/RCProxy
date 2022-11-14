@@ -19,6 +19,10 @@ struct RequestItem: Identifiable {
     let statusCode: String
     let statusColor: UIColor
     let cURL: String
+
+    var relativePath: String {
+        URL(string: url)?.relativePath ?? ""
+    }
 }
 
 final class RCRequestsListViewModel: ObservableObject {

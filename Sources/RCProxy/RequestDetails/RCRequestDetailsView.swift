@@ -27,7 +27,8 @@ struct RCRequestDetailsView: View {
                 NavigationLink {
                     RCRequestJsonView(viewModel: RCRequestJsonViewModel(
                         json: item.requestHeaders,
-                        prettyJson: item.requestHeaders.prettyfiedHeaders()
+                        prettyJson: item.requestHeaders.prettyfiedHeaders(),
+                        jsonTitle: jsonTitle(withSuffix: "request-headers")
                     ))
                 } label: {
                     Text("Headers")
@@ -36,7 +37,8 @@ struct RCRequestDetailsView: View {
                 NavigationLink {
                     RCRequestJsonView(viewModel: RCRequestJsonViewModel(
                         json: item.requestBodyJson,
-                        prettyJson: item.requestBody
+                        prettyJson: item.requestBody,
+                        jsonTitle: jsonTitle(withSuffix: "request-body")
                     ))
                 } label: {
                     Text("Body")
@@ -52,7 +54,8 @@ struct RCRequestDetailsView: View {
                 NavigationLink {
                     RCRequestJsonView(viewModel: RCRequestJsonViewModel(
                         json: item.responseHeaders,
-                        prettyJson: item.responseHeaders.prettyfiedHeaders()
+                        prettyJson: item.responseHeaders.prettyfiedHeaders(),
+                        jsonTitle: jsonTitle(withSuffix: "response-headers")
                     ))
                 } label: {
                     Text("Headers")
@@ -62,7 +65,8 @@ struct RCRequestDetailsView: View {
                 NavigationLink {
                     RCRequestJsonView(viewModel: RCRequestJsonViewModel(
                         json: item.responseBodyJson,
-                        prettyJson: item.responseBody
+                        prettyJson: item.responseBody,
+                        jsonTitle: jsonTitle(withSuffix: "response-body")
                     ))
                 } label: {
                     Text("Body")
@@ -76,7 +80,7 @@ struct RCRequestDetailsView: View {
         }
         .padding(8)
         .frame(maxWidth: .infinity)
-        .navigationTitle(URL(string: item.url)?.relativePath ?? "")
+        .navigationTitle(item.relativePath)
         #if os(iOS)
         .toolbar {
             Button(action: {
@@ -92,6 +96,10 @@ struct RCRequestDetailsView: View {
             ShareSheetView(activityItems: [item.cURL])
         })
         #endif
+    }
+
+    func jsonTitle(withSuffix suffix: String) -> String {
+        "\(item.relativePath.dropFirst().replacingOccurrences(of: "/", with: "-"))_\(suffix)"
     }
 }
 
