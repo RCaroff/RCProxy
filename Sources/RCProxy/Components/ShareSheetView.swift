@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 
+#if os(iOS)
 struct ShareSheetView: UIViewControllerRepresentable {
 
     typealias Callback = (_ activityType: UIActivity.ActivityType?,
@@ -33,3 +34,4 @@ struct ShareSheetView: UIViewControllerRepresentable {
         // nothing to do here
     }
 }
+#endif
