@@ -48,6 +48,12 @@ extension Data {
     }
 }
 
+extension Dictionary<String, Any> {
+    func toData() -> Data? {
+        return try? JSONSerialization.data(withJSONObject: self)
+    }
+}
+
 extension String {
     func toJSONFile(withName name: String) -> URL? {
         if let documentDirectory = FileManager.default.urls(for: .documentDirectory,
@@ -92,12 +98,46 @@ extension URLRequest {
             }
         }
 
-        if let bodyData = self.httpBody, let bodyString = String(data: bodyData, encoding: .utf8),  !bodyString.isEmpty {
+        if let body = self.bodySteamAsJSON() as? [String: Any],
+           let bodyData = body.toData(),
+           let bodyString = String(data: bodyData, encoding: .utf8),
+           !bodyString.isEmpty {
             data = "--data '\(bodyString)'"
         }
 
         cURL += method + url + header + data
 
         return cURL
+    }
+
+    func bodySteamAsJSON() -> Any? {
+
+        guard let bodyStream = self.httpBodyStream else { return nil }
+
+        bodyStream.open()
+
+        // Will read 16 chars per iteration. Can use bigger buffer if needed
+        let bufferSize: Int = 16
+
+        let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
+
+        var dat = Data()
+
+        while bodyStream.hasBytesAvailable {
+
+            let readDat = bodyStream.read(buffer, maxLength: bufferSize)
+            dat.append(buffer, count: readDat)
+        }
+
+        buffer.deallocate()
+
+        bodyStream.close()
+
+        do {
+            return try JSONSerialization.jsonObject(with: dat, options: JSONSerialization.ReadingOptions.allowFragments)
+        } catch {
+            print(error.localizedDescription)
+            return nil
+        }
     }
 }

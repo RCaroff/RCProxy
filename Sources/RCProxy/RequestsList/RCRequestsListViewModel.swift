@@ -41,8 +41,8 @@ final class RCRequestsListViewModel: ObservableObject {
         storage.requests.forEach({ request, date in
             let cURL = request.cURL()
             let urlString = request.url?.absoluteString ?? "No URL"
-            let requestBody = request.httpBody.toJSON()
-            let requestBodyJson =  request.httpBody.toJSONObject()
+            let requestBodyJson =  request.bodySteamAsJSON() as? [String: Any]
+            let requestBody = requestBodyJson?.toData()?.toJSON()
             let response = storage.responses[request]?.0 as? HTTPURLResponse
 
             let responseData = storage.responses[request]?.1
@@ -60,8 +60,8 @@ final class RCRequestsListViewModel: ObservableObject {
             let item = RequestItem(
                 url: urlString,
                 requestHeaders: request.allHTTPHeaderFields ?? ["No":"Content"],
-                requestBody: requestBody,
-                requestBodyJson: requestBodyJson,
+                requestBody: requestBody ?? "No Content",
+                requestBodyJson: requestBodyJson ?? [:],
                 responseHeaders: (response?.allHeaderFields as? [String: String]) ?? ["No":"Content"],
                 responseBody: responseBody,
                 responseBodyJson: responseBodyJson,
