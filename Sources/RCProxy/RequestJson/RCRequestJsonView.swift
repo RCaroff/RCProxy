@@ -26,10 +26,10 @@ struct RCRequestJsonView: View {
 
     var body: some View {
         List {
-            ForEach(Array(viewModel.lines.enumerated()), id: \.element.id) { index, line in
-                JSONCell(line: line) { [line, index] isExpanded in
+            ForEach($viewModel.lines) { $line in
+                JSONCell(line: $line) { [line] isExpanded in
                     if isExpanded {
-                        viewModel.expand(blockId: line.blockId, at: index)
+                        viewModel.expand(blockId: line.blockId)
                     } else {
                         viewModel.collapse(blockId: line.blockId)
                     }
@@ -80,7 +80,7 @@ struct JSONCell: View {
         return 12
     }
 
-    @StateObject var line: JSONLine
+    @Binding var line: JSONLine
     var tapAction: (Bool) -> Void
     var longPressAction: () -> Void
 
@@ -104,6 +104,7 @@ struct JSONCell: View {
             }
             .padding(.leading, padding*CGFloat(line.indentLevel))
         }
+
         #if os(iOS)
         .onTapGesture {
             if line.isExpandable {

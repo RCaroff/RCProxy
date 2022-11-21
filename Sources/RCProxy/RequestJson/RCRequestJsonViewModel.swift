@@ -21,14 +21,15 @@ class JSONBlock: ObservableObject, Identifiable {
     }
 }
 
-class JSONLine: ObservableObject, Identifiable {
+class JSONLine: ObservableObject, Identifiable, Equatable {
+
     let id: UUID
     let blockId: String
     let parentBlockId: String?
     let value: String
     let indentLevel: Int
     let isExpandable: Bool
-    @Published var isExpanded: Bool = false
+    var isExpanded: Bool = false
 
     internal init(
         id: UUID,
@@ -44,6 +45,10 @@ class JSONLine: ObservableObject, Identifiable {
         self.value = value
         self.indentLevel = indentLevel
         self.isExpandable = isExpandable
+    }
+
+    static func == (lhs: JSONLine, rhs: JSONLine) -> Bool {
+        return lhs.id == rhs.id
     }
 }
 
@@ -70,15 +75,17 @@ class RCRequestJsonViewModel: ObservableObject {
         }
     }
 
-    func expand(blockId: String, at index: Int) {
-        lines[index].isExpanded = true
+    func expand(blockId: String) {
+        guard let selectedLineIndex = lines.firstIndex(where: { $0.blockId == blockId }) else { return }
+        let selectedLine = lines[selectedLineIndex]
+        selectedLine.isExpanded = true
         let linesToAdd = allLines.filter {
             $0.parentBlockId == blockId
         }.sorted { line1, line2 in
             line1.indentLevel > line2.indentLevel
         }
 
-        lines.insert(contentsOf: linesToAdd, at: index+1)
+        lines.insert(contentsOf: linesToAdd, at: selectedLineIndex+1)
     }
 
     func collapse(blockId: String) {
