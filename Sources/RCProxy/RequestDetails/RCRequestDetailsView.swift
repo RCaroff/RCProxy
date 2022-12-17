@@ -17,7 +17,7 @@ struct RCRequestDetailsView: View {
 
         List {
             HStack(spacing: isTV ? 24 : 8) {
-                StatusCodeBadgeView(code: item.statusCode, color: item.statusColor)
+                StatusCodeBadgeView(code: "\(item.method) \(item.statusCode)", color: item.statusColor)
                 Text(item.url)
                     .font(.system(size: isTV ? 32 : 14, weight: .regular))
             }
@@ -107,6 +107,7 @@ struct RCRequestDetailsView_Previews: PreviewProvider {
     static var previews: some View {
         RCRequestDetailsView(item: RequestItem(
             url: "https://dev-api.fubo.tv/movies",
+            method: "GET",
             requestHeaders: ["x-access-token": "fjdsbnobnzoge45e4gerg3"],
             requestBody: "",
             requestBodyJson: [:],

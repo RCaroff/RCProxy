@@ -62,7 +62,7 @@ struct RCProxyRequestItemCell: View {
         } label: {
             ZStack {
                 HStack(spacing: isTV ? 24 : 8) {
-                    StatusCodeBadgeView(code: item.statusCode, color: item.statusColor)
+                    StatusCodeBadgeView(code: "\(item.method) \(item.statusCode)", color: item.statusColor)
                     Text(item.url)
                         .font(.system(size: fontSize))
                     Spacer()
@@ -92,6 +92,7 @@ struct RCProxyView_Previews: PreviewProvider {
         viewModel.items = [
             RequestItem(
                 url: "https://swapi.dev/api/people",
+                method: "GET",
                 requestHeaders: ["x-access-token": "fjdsbnobnzoge45e4gerg3"],
                 requestBody: "",
                 requestBodyJson: [:],
@@ -104,6 +105,7 @@ struct RCProxyView_Previews: PreviewProvider {
             ),
             RequestItem(
                 url: "https://swapi.dev/api/people",
+                method: "GET",
                 requestHeaders: ["x-access-token": "fjdsbnobnzoge45e4gerg3"],
                 requestBody: "",
                 requestBodyJson: [:],

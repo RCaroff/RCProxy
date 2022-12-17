@@ -10,6 +10,7 @@ import SwiftUI
 struct RequestItem: Identifiable {
     let id = UUID()
     let url: String
+    let method: String
     let requestHeaders: [String: String]
     let requestBody: String
     var requestBodyJson: [String: Any]
@@ -41,10 +42,10 @@ final class RCRequestsListViewModel: ObservableObject {
         storage.requests.forEach({ request, date in
             let cURL = request.cURL()
             let urlString = request.url?.absoluteString ?? "No URL"
+            let method = (request.httpMethod ?? "").uppercased()
             let requestBodyJson =  request.bodySteamAsJSON() as? [String: Any]
             let requestBody = requestBodyJson?.toData()?.toJSON()
             let response = storage.responses[request]?.0 as? HTTPURLResponse
-
             let responseData = storage.responses[request]?.1
             let responseBody = responseData?.toJSON() ?? "No content"
             let responseBodyJson =  responseData?.toJSONObject() ?? [:]
@@ -59,6 +60,7 @@ final class RCRequestsListViewModel: ObservableObject {
 
             let item = RequestItem(
                 url: urlString,
+                method: method,
                 requestHeaders: request.allHTTPHeaderFields ?? ["No":"Content"],
                 requestBody: requestBody ?? "No Content",
                 requestBodyJson: requestBodyJson ?? [:],
