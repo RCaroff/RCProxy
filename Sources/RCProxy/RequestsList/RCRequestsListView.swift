@@ -12,13 +12,19 @@ var isTV: Bool {
 
 struct RCRequestsListView: View {
     @ObservedObject var viewModel: RCRequestsListViewModel
+    @State private var showDetails: Bool = false
 
     var body: some View {
         if #available(iOS 16.0, tvOS 16.0, *) {
             NavigationStack {
                 List {
                     ForEach(viewModel.items) { item in
-                        RCProxyRequestItemCell(item: item)
+                        ZStack {
+                            NavigationLink("") {
+                                RCRequestDetailsView(item: item)
+                            }
+                            RCProxyRequestItemCell(item: item)
+                        }
                     }
                 }
                 .navigationTitle("Requests")
@@ -30,7 +36,12 @@ struct RCRequestsListView: View {
             NavigationView {
                 List {
                     ForEach(viewModel.items) { item in
-                        RCProxyRequestItemCell(item: item)
+                        ZStack {
+                            NavigationLink("") {
+                                RCRequestDetailsView(item: item)
+                            }
+                            RCProxyRequestItemCell(item: item)
+                        }
                     }
                 }
                 .navigationTitle("Requests")
@@ -54,23 +65,16 @@ struct RCProxyRequestItemCell: View {
         return 14
     }
 
-    @State private var showDetails: Bool = false
-
     var body: some View {
-        Button {
-            showDetails = true
-        } label: {
-            ZStack {
-                HStack(spacing: isTV ? 24 : 8) {
-                    StatusCodeBadgeView(code: "\(item.method) \(item.statusCode)", color: item.statusColor)
-                    Text(item.url)
-                        .font(.system(size: fontSize))
-                    Spacer()
-                }
-                NavigationLink("", destination: RCRequestDetailsView(item: item), isActive: $showDetails)
+        ZStack {
+            HStack(spacing: isTV ? 24 : 8) {
+                StatusCodeBadgeView(code: "\(item.method) \(item.statusCode)", color: item.statusColor)
+                Text(item.url)
+                    .font(.system(size: fontSize))
+                Spacer()
             }
         }
-        .padding(4)
+        .padding(.vertical, 4)
     }
 }
 
