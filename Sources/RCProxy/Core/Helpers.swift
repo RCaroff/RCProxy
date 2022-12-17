@@ -40,10 +40,27 @@ extension Data {
 
     func toJSONObject() -> [String: Any] {
         do {
-            let jsonObject: Dictionary<String, Any>? = try JSONSerialization.jsonObject(with: self) as? Dictionary<String, Any>
-            return jsonObject ?? [:]
+            if let jsonObject = try JSONSerialization.jsonObject(with: self) as? Dictionary<String, Any> {
+                return jsonObject
+            } else {
+                let jsonArray = toJSONArray()
+                if jsonArray.isEmpty {
+                    return [:]
+                } else {
+                    return ["[ \(jsonArray.count) elements ]": jsonArray]
+                }
+            }
         } catch {
             return [:]
+        }
+    }
+
+    func toJSONArray() -> [[String: Any]] {
+        do {
+            let jsonObject: Array<Dictionary<String, Any>>? = try JSONSerialization.jsonObject(with: self) as? Array<Dictionary<String, Any>>
+            return jsonObject ?? []
+        } catch {
+            return []
         }
     }
 }

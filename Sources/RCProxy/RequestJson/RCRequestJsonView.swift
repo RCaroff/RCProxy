@@ -13,12 +13,7 @@ struct RCRequestJsonView: View {
     @State var showCopiedToast: Bool = false
     @State var isSharing: Bool = false
 
-    var minimumRowHeight: CGFloat {
-        if isTV {
-            return 1.0
-        }
-        return 48.0
-    }
+    var minimumRowHeight: CGFloat { isTV ? 1.0 : 48.0 }
 
     init(viewModel: RCRequestJsonViewModel) {
         self.viewModel = viewModel
@@ -65,20 +60,8 @@ struct RCRequestJsonView: View {
 }
 
 struct JSONCell: View {
-
-    var padding: CGFloat {
-        if isTV {
-            return 32
-        }
-        return 8
-    }
-
-    var fontSize: CGFloat {
-        if isTV {
-            return 16
-        }
-        return 12
-    }
+    var padding: CGFloat { isTV ? 32 : 8 }
+    var fontSize: CGFloat { isTV ? 16 : 12 }
 
     @Binding var line: JSONLine
     var tapAction: (Bool) -> Void
