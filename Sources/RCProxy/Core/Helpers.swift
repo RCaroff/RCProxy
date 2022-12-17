@@ -47,7 +47,7 @@ extension Data {
                 if jsonArray.isEmpty {
                     return [:]
                 } else {
-                    return ["[ \(jsonArray.count) elements ]": jsonArray]
+                    return ["": jsonArray]
                 }
             }
         } catch {

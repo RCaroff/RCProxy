@@ -133,7 +133,7 @@ class RCRequestJsonViewModel: ObservableObject {
                         )
                     )
                 }
-                if indentLevel == 0 {
+                if key.isEmpty {
                     block.text = "[ \(value.count) element\(value.count > 1 ? "s" : "") ]"
                 } else {
                     block.text = "\"\(key)\": [ \(value.count) element\(value.count > 1 ? "s" : "") ]"
