@@ -23,7 +23,7 @@ class RCProxyProtocol: URLProtocol {
     }
 
     override func startLoading() {
-        RCProxy.storage.store(request: (request, Date()))
+        RCProxy.storage.store(request: RequestData(urlRequest: request, date: Date()))
 
         let mutableRequest = (request as NSURLRequest).mutableCopy() as! NSMutableURLRequest
         URLProtocol.setProperty(true, forKey: "is_handled", in: mutableRequest)
@@ -39,7 +39,7 @@ class RCProxyProtocol: URLProtocol {
             }
             self.client?.urlProtocolDidFinishLoading(self)
             if let response = response {
-                RCProxy.storage.store(responseData: (response, data), for: self.request)
+                RCProxy.storage.store(responseData: ResponseData(urlResponse: response, data: data), for: self.request)
             }
         })
         dataTask?.resume()
