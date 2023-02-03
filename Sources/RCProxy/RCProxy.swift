@@ -16,7 +16,7 @@ public final class RCProxy {
         case userDefaults
     }
 
-    static let storage: RequestsStorage = SessionRequestsStorage()
+    static let storage: RequestsStorage = UserDefaultsRequestsStorage()
 
     public static var viewController: UIViewController {
         UIHostingController(rootView: RCRequestsListView(viewModel: RCRequestsListViewModel(storage: storage)))

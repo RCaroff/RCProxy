@@ -37,16 +37,33 @@ final class SessionRequestsStorage: RequestsStorage {
 }
 
 final class UserDefaultsRequestsStorage: RequestsStorage {
-    var requestItems: [RequestItem] = []
 
-    let requestsKey = "RCProxy_requests_storage_key"
-    let responsesKey = "RCProxy_responses_storage_key"
+    var requestItems: [RequestItem] {
+        get {
+            guard let data = UserDefaults.standard.data(forKey: storageKey) else { return [] }
+            return (try? decoder.decode([RequestItem].self, from: data)) ?? []
+        }
+
+        set {
+            guard let data = try? encoder.encode(newValue) else { return }
+            UserDefaults.standard.set(data, forKey: storageKey)
+        }
+    }
+
+    private let storageKey = "RCProxy_requests_storage_key"
+    private let encoder = JSONEncoder()
+    private let decoder = JSONDecoder()
 
     func store(request: RequestData) {
-        requestItems.append(RequestItem(with: request))
+        let item = RequestItem(with: request)
+        var items = requestItems
+        items.append(item)
+        requestItems = items
     }
 
     func store(responseData: ResponseData, forRequestID id: String) {
-        requestItems.first(where: { $0.id == id })?.populate(with: responseData)
+        let items = requestItems
+        items.first(where: { $0.id == id })?.populate(with: responseData)
+        requestItems = items
     }
 }
