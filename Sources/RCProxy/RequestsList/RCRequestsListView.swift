@@ -28,6 +28,14 @@ struct RCRequestsListView: View {
                     }
                 }
                 .navigationTitle("Requests")
+                .toolbar {
+                    Button {
+                        viewModel.clear()
+                    } label: {
+                        Image(systemName: "trash")
+                    }
+
+                }
             }
             #if os(iOS)
             .navigationBarTitleDisplayMode(.large)

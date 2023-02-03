@@ -22,6 +22,7 @@ protocol RequestsStorage {
     var requestItems: [RequestItem] { get set }
     func store(request: RequestData)
     func store(responseData: ResponseData, forRequestID id: String)
+    func clear()
 }
 
 final class SessionRequestsStorage: RequestsStorage {
@@ -33,6 +34,10 @@ final class SessionRequestsStorage: RequestsStorage {
 
     func store(responseData: ResponseData, forRequestID id: String) {
         requestItems.first(where: { $0.id == id })?.populate(with: responseData)
+    }
+
+    func clear() {
+        requestItems = []
     }
 }
 
@@ -65,5 +70,9 @@ final class UserDefaultsRequestsStorage: RequestsStorage {
         let items = requestItems
         items.first(where: { $0.id == id })?.populate(with: responseData)
         requestItems = items
+    }
+
+    func clear() {
+        requestItems = []
     }
 }

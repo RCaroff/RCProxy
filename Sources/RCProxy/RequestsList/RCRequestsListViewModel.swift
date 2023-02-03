@@ -21,4 +21,9 @@ final class RCRequestsListViewModel: ObservableObject {
     func fetch() {
         items = storage.requestItems
     }
+
+    func clear() {
+        items = []
+        storage.clear()
+    }
 }
