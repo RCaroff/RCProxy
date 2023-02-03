@@ -23,13 +23,14 @@ class RCProxyProtocol: URLProtocol {
     }
 
     override func startLoading() {
-        RCProxy.storage.store(request: RequestData(urlRequest: request, date: Date()))
+        let id = UUID().uuidString
+        RCProxy.storage.store(request: RequestData(id: id, urlRequest: request, date: Date()))
 
         let mutableRequest = (request as NSURLRequest).mutableCopy() as! NSMutableURLRequest
         URLProtocol.setProperty(true, forKey: "is_handled", in: mutableRequest)
         let newRequest = mutableRequest as URLRequest
 
-        dataTask = URLSession.shared.dataTask(with: newRequest, completionHandler: { data, response, error in
+        dataTask = URLSession.shared.dataTask(with: newRequest, completionHandler: { [id] data, response, error in
 
             if let data = data, let response = response {
                 self.client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
@@ -38,14 +39,14 @@ class RCProxyProtocol: URLProtocol {
                 self.client?.urlProtocol(self, didFailWithError: error)
             }
             self.client?.urlProtocolDidFinishLoading(self)
-            if let response = response {
-                RCProxy.storage.store(responseData: ResponseData(urlResponse: response, data: data), for: self.request)
+            if let response = response as? HTTPURLResponse {
+                RCProxy.storage.store(responseData: ResponseData(urlResponse: response, data: data), forRequestID: id)
             }
         })
         dataTask?.resume()
     }
 
     override func stopLoading() {
-        self.dataTask?.cancel()
+        dataTask?.cancel()
     }
 }

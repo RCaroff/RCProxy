@@ -115,7 +115,7 @@ extension URLRequest {
             }
         }
 
-        if let body = self.bodySteamAsJSON() as? [String: Any],
+        if let body = self.bodyStreamAsJSON() as? [String: Any],
            let bodyData = body.toData(),
            let bodyString = String(data: bodyData, encoding: .utf8),
            !bodyString.isEmpty {
@@ -127,8 +127,7 @@ extension URLRequest {
         return cURL
     }
 
-    func bodySteamAsJSON() -> Any? {
-
+    func bodyStream() -> Data? {
         guard let bodyStream = self.httpBodyStream else { return nil }
 
         bodyStream.open()
@@ -149,6 +148,12 @@ extension URLRequest {
         buffer.deallocate()
 
         bodyStream.close()
+
+        return dat
+    }
+
+    func bodyStreamAsJSON() -> Any? {
+        guard let dat = bodyStream() else { return nil }
 
         do {
             return try JSONSerialization.jsonObject(with: dat, options: JSONSerialization.ReadingOptions.allowFragments)

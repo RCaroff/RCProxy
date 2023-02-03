@@ -8,75 +8,45 @@
 import Foundation
 
 struct RequestData: Hashable {
+    let id: String
     let urlRequest: URLRequest
     let date: Date
-
-    func toData() -> Data? {
-        try? NSKeyedArchiver.archivedData(withRootObject: self, requiringSecureCoding: true)
-    }
 }
 
 struct ResponseData: Hashable {
-    let urlResponse: URLResponse
+    let urlResponse: HTTPURLResponse
     let data: Data?
-
-    func toData() -> Data? {
-        try? NSKeyedArchiver.archivedData(withRootObject: self, requiringSecureCoding: true)
-    }
 }
 
 protocol RequestsStorage {
-    var requests: [RequestData] { get }
-    var responses: [URLRequest: ResponseData] { get }
+    var requestItems: [RequestItem] { get set }
     func store(request: RequestData)
-    func store(responseData: ResponseData, for urlRequest: URLRequest)
+    func store(responseData: ResponseData, forRequestID id: String)
 }
 
 final class SessionRequestsStorage: RequestsStorage {
-
-    var requests: [RequestData] = []
-    var responses: [URLRequest: ResponseData] = [:]
+    var requestItems: [RequestItem] = []
 
     func store(request: RequestData) {
-        requests.append(request)
-        requests.sort(by: { $0.date > $1.date })
+        requestItems.append(RequestItem(with: request))
     }
 
-    func store(responseData: ResponseData, for urlRequest: URLRequest) {
-        responses.updateValue(responseData, forKey: urlRequest)
+    func store(responseData: ResponseData, forRequestID id: String) {
+        requestItems.first(where: { $0.id == id })?.populate(with: responseData)
     }
 }
 
 final class UserDefaultsRequestsStorage: RequestsStorage {
+    var requestItems: [RequestItem] = []
+
     let requestsKey = "RCProxy_requests_storage_key"
     let responsesKey = "RCProxy_responses_storage_key"
 
-    var requests: [RequestData] {
-        get {
-
-        }
-
-        set {
-
-        }
-    }
-
-    var responses: [URLRequest: ResponseData] {
-        get {
-            (UserDefaults.standard.dictionary(forKey: responsesKey) as? [URLRequest: ResponseData]) ?? [:]
-        }
-
-        set {
-            UserDefaults.standard.set(newValue, forKey: responsesKey)
-        }
-    }
-
     func store(request: RequestData) {
-        requests.append(request)
-        requests.sort(by: { $0.date > $1.date })
+        requestItems.append(RequestItem(with: request))
     }
 
-    func store(responseData: ResponseData, for urlRequest: URLRequest) {
-        responses.updateValue(responseData, forKey: urlRequest)
+    func store(responseData: ResponseData, forRequestID id: String) {
+        requestItems.first(where: { $0.id == id })?.populate(with: responseData)
     }
 }

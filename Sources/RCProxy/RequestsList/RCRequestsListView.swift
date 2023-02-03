@@ -89,39 +89,3 @@ struct StatusCodeBadgeView: View {
             .cornerRadius(8)
     }
 }
-
-struct RCProxyView_Previews: PreviewProvider {
-    static var previews: some View {
-        let viewModel = RCRequestsListViewModel(storage: RCProxy.storage)
-        viewModel.items = [
-            RequestItem(
-                url: "https://swapi.dev/api/people",
-                method: "GET",
-                requestHeaders: ["x-access-token": "fjdsbnobnzoge45e4gerg3"],
-                requestBody: "",
-                requestBodyJson: [:],
-                responseHeaders: ["x-country-code": "US"],
-                responseBody: "{}",
-                responseBodyJson: [:],
-                statusCode: "200",
-                statusColor: .systemGreen,
-                cURL: ""
-            ),
-            RequestItem(
-                url: "https://swapi.dev/api/people",
-                method: "GET",
-                requestHeaders: ["x-access-token": "fjdsbnobnzoge45e4gerg3"],
-                requestBody: "",
-                requestBodyJson: [:],
-                responseHeaders: ["x-country-code": "US"],
-                responseBody: "{}",
-                responseBodyJson: [:],
-                statusCode: "400",
-                statusColor: .systemRed,
-                cURL: ""
-            )
-        ]
-        return RCRequestsListView(viewModel: viewModel)
-            .preferredColorScheme(.dark)
-    }
-}
