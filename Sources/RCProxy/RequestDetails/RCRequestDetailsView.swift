@@ -102,21 +102,3 @@ struct RCRequestDetailsView: View {
         "\(item.relativePath.dropFirst().replacingOccurrences(of: "/", with: "-"))_\(suffix)"
     }
 }
-
-struct RCRequestDetailsView_Previews: PreviewProvider {
-    static var previews: some View {
-        RCRequestDetailsView(item: RequestItem(
-            url: "https://dev-api.fubo.tv/movies",
-            method: "GET",
-            requestHeaders: ["x-access-token": "fjdsbnobnzoge45e4gerg3"],
-            requestBody: "",
-            requestBodyJson: [:],
-            responseHeaders: ["x-country-code": "US"],
-            responseBody: "{}",
-            responseBodyJson: [:],
-            statusCode: "400",
-            statusColor: .systemRed,
-            cURL: ""
-        ))
-    }
-}

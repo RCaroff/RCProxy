@@ -28,6 +28,14 @@ struct RCRequestsListView: View {
                     }
                 }
                 .navigationTitle("Requests")
+                .toolbar {
+                    Button {
+                        viewModel.clear()
+                    } label: {
+                        Image(systemName: "trash")
+                    }
+
+                }
             }
             #if os(iOS)
             .navigationBarTitleDisplayMode(.large)
@@ -69,8 +77,15 @@ struct RCProxyRequestItemCell: View {
         ZStack {
             HStack(spacing: isTV ? 24 : 8) {
                 StatusCodeBadgeView(code: "\(item.method) \(item.statusCode)", color: item.statusColor)
+                #if os(iOS)
                 Text(item.url)
                     .font(.system(size: fontSize))
+                #else
+                Button {} label: {
+                    Text(item.url)
+                        .font(.system(size: fontSize))
+                }
+                #endif
                 Spacer()
             }
         }
@@ -87,41 +102,5 @@ struct StatusCodeBadgeView: View {
             .padding(8)
             .background(Color(color))
             .cornerRadius(8)
-    }
-}
-
-struct RCProxyView_Previews: PreviewProvider {
-    static var previews: some View {
-        let viewModel = RCRequestsListViewModel(storage: RCProxy.storage)
-        viewModel.items = [
-            RequestItem(
-                url: "https://swapi.dev/api/people",
-                method: "GET",
-                requestHeaders: ["x-access-token": "fjdsbnobnzoge45e4gerg3"],
-                requestBody: "",
-                requestBodyJson: [:],
-                responseHeaders: ["x-country-code": "US"],
-                responseBody: "{}",
-                responseBodyJson: [:],
-                statusCode: "200",
-                statusColor: .systemGreen,
-                cURL: ""
-            ),
-            RequestItem(
-                url: "https://swapi.dev/api/people",
-                method: "GET",
-                requestHeaders: ["x-access-token": "fjdsbnobnzoge45e4gerg3"],
-                requestBody: "",
-                requestBodyJson: [:],
-                responseHeaders: ["x-country-code": "US"],
-                responseBody: "{}",
-                responseBodyJson: [:],
-                statusCode: "400",
-                statusColor: .systemRed,
-                cURL: ""
-            )
-        ]
-        return RCRequestsListView(viewModel: viewModel)
-            .preferredColorScheme(.dark)
     }
 }

@@ -11,7 +11,23 @@ import SwiftUI
 
 public final class RCProxy {
 
-    static let storage: RequestsStorage = SessionRequestsStorage()
+    public enum StorageType {
+        case session
+        case userDefaults
+    }
+
+    static var storage: RequestsStorage = UserDefaultsRequestsStorage()
+
+    public static var storageType: StorageType = .userDefaults {
+        didSet {
+            switch storageType {
+            case .session:
+                storage = SessionRequestsStorage()
+            case .userDefaults:
+                storage = UserDefaultsRequestsStorage()
+            }
+        }
+    }
 
     public static var viewController: UIViewController {
         UIHostingController(rootView: RCRequestsListView(viewModel: RCRequestsListViewModel(storage: storage)))
