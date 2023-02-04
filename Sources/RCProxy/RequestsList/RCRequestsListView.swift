@@ -77,8 +77,15 @@ struct RCProxyRequestItemCell: View {
         ZStack {
             HStack(spacing: isTV ? 24 : 8) {
                 StatusCodeBadgeView(code: "\(item.method) \(item.statusCode)", color: item.statusColor)
+                #if os(iOS)
                 Text(item.url)
                     .font(.system(size: fontSize))
+                #else
+                Button {} label: {
+                    Text(item.url)
+                        .font(.system(size: fontSize))
+                }
+                #endif
                 Spacer()
             }
         }
