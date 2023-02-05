@@ -70,12 +70,16 @@ struct JSONCell: View {
     var body: some View {
         Button {
             if line.isExpandable {
-                tapAction(!line.isExpanded)
+                withAnimation {
+                    tapAction(!line.isExpanded)
+                }
             }
         } label: {
             HStack {
                 if line.isExpandable {
-                    Text(line.isExpanded ? "▼" : "▶︎")
+                    Text("▶︎")
+                        .rotationEffect(.degrees(line.isExpanded ? 90 : 0))
+                        .animation(.easeInOut(duration: 0.2), value: line.isExpanded)
                 } else {
                     Text("•")
                 }
@@ -87,11 +91,13 @@ struct JSONCell: View {
             }
             .padding(.leading, padding*CGFloat(line.indentLevel))
         }
-
+        .tint(.white)
         #if os(iOS)
         .onTapGesture {
             if line.isExpandable {
-                tapAction(!line.isExpanded)
+                withAnimation {
+                    tapAction(!line.isExpanded)
+                }
             }
         }
         .onLongPressGesture { longPressAction() }

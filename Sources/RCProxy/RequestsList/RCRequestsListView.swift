@@ -34,9 +34,9 @@ struct RCRequestsListView: View {
                     } label: {
                         Image(systemName: "trash")
                     }
-
                 }
             }
+            .tint(.white)
             #if os(iOS)
             .navigationBarTitleDisplayMode(.large)
             #endif
