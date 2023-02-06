@@ -13,53 +13,67 @@ var isTV: Bool {
 struct RCRequestsListView: View {
     @ObservedObject var viewModel: RCRequestsListViewModel
     @State private var showDetails: Bool = false
+    @Environment(\.dismiss) var dismiss
 
     var body: some View {
-        if #available(iOS 16.0, tvOS 16.0, *) {
-            NavigationStack {
-                List {
-                    ForEach(viewModel.items) { item in
-                        ZStack {
-                            NavigationLink("") {
-                                RCRequestDetailsView(item: item)
-                            }
-                            RCProxyRequestItemCell(item: item)
-                        }
-                    }
+        if viewModel.items.isEmpty {
+            VStack {
+                Text("🤷‍♀️")
+                    .font(.title)
+                Text("No request")
+                Button {
+                    dismiss()
+                } label: {
+                    Text("Close")
                 }
-                .navigationTitle("Requests")
-                .toolbar {
-                    Button {
-                        viewModel.clear()
-                    } label: {
-                        Image(systemName: "trash")
-                    }
-                }
+                .padding()
             }
-            .tint(.white)
-            #if os(iOS)
-            .navigationBarTitleDisplayMode(.large)
-            #endif
         } else {
-            NavigationView {
-                List {
-                    ForEach(viewModel.items) { item in
-                        ZStack {
-                            NavigationLink("") {
-                                RCRequestDetailsView(item: item)
+            if #available(iOS 16.0, tvOS 16.0, *) {
+                NavigationStack {
+                    List {
+                        ForEach(viewModel.items) { item in
+                            ZStack {
+                                NavigationLink("") {
+                                    RCRequestDetailsView(item: item)
+                                }
+                                RCProxyRequestItemCell(item: item)
                             }
-                            RCProxyRequestItemCell(item: item)
+                        }
+                    }
+                    .navigationTitle("Requests")
+                    .toolbar {
+                        Button {
+                            viewModel.clear()
+                        } label: {
+                            Image(systemName: "trash")
                         }
                     }
                 }
-                .navigationTitle("Requests")
+                .tint(.white)
+                #if os(iOS)
+                .navigationBarTitleDisplayMode(.large)
+                #endif
+            } else {
+                NavigationView {
+                    List {
+                        ForEach(viewModel.items) { item in
+                            ZStack {
+                                NavigationLink("") {
+                                    RCRequestDetailsView(item: item)
+                                }
+                                RCProxyRequestItemCell(item: item)
+                            }
+                        }
+                    }
+                    .navigationTitle("Requests")
+                }
+                .navigationViewStyle(.stack)
+                #if os(iOS)
+                .navigationBarTitleDisplayMode(.large)
+                #endif
             }
-            .navigationViewStyle(.stack)
-            #if os(iOS)
-            .navigationBarTitleDisplayMode(.large)
-            #endif
         }
-
     }
 }
 
