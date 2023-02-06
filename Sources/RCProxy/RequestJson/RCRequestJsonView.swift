@@ -23,6 +23,10 @@ struct RCRequestJsonView: View {
         List {
             ForEach($viewModel.lines) { $line in
                 JSONCell(line: $line) { [line] isExpanded in
+                    #if os(iOS)
+                    UIImpactFeedbackGenerator(style: .medium)
+                        .impactOccurred()
+                    #endif
                     if isExpanded {
                         viewModel.expand(blockId: line.blockId)
                     } else {
@@ -37,6 +41,7 @@ struct RCRequestJsonView: View {
             }
             .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 0))
         }
+        .animation(.easeOut(duration: 0.3), value: viewModel.lines.count)
         .environment(\.defaultMinListRowHeight, minimumRowHeight)
         .toast(message: "Copied!", isShowing: $showCopiedToast, duration: Toast.short)
 #if os(iOS)
@@ -75,7 +80,9 @@ struct JSONCell: View {
         } label: {
             HStack {
                 if line.isExpandable {
-                    Text(line.isExpanded ? "▼" : "▶︎")
+                    Text("▶︎")
+                        .rotationEffect(.degrees(line.isExpanded ? 90 : 0))
+                        .animation(.spring(response: 0.3, dampingFraction: 0.5, blendDuration: 0.1), value: line.isExpanded)
                 } else {
                     Text("•")
                 }
@@ -87,14 +94,18 @@ struct JSONCell: View {
             }
             .padding(.leading, padding*CGFloat(line.indentLevel))
         }
-
+        .tint(.white)
         #if os(iOS)
         .onTapGesture {
             if line.isExpandable {
                 tapAction(!line.isExpanded)
             }
         }
-        .onLongPressGesture { longPressAction() }
+        .onLongPressGesture {
+            UIImpactFeedbackGenerator(style: .rigid)
+                .impactOccurred()
+            longPressAction()
+        }
         #endif
     }
 }

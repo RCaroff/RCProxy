@@ -30,7 +30,12 @@ public final class RCProxy {
     }
 
     public static var viewController: UIViewController {
-        UIHostingController(rootView: RCRequestsListView(viewModel: RCRequestsListViewModel(storage: storage)))
+        UIHostingController(rootView: view)
+    }
+
+    public static var view: some View {
+        RCRequestsListView(viewModel: RCRequestsListViewModel(storage: storage))
+            .preferredColorScheme(.dark)
     }
 
     public static func start() {
