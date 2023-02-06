@@ -10,6 +10,8 @@ A lightweight inapp HTTP requests logger for your iOS and tvOS apps.
 ![Simulator Screen Shot - iPhone 14 Pro - 2023-02-06 at 02 11 21](https://user-images.githubusercontent.com/6641303/216860620-cf7852b2-cd1f-4e84-80c0-d4f47fb43755.png)
 ![Simulator Screen Shot - iPhone 14 Pro - 2023-02-06 at 02 11 31](https://user-images.githubusercontent.com/6641303/216860616-36c8e1f3-ea83-4733-b281-2703664dd8b8.png)
 ![Simulator Screen Shot - iPhone 14 Pro - 2023-02-06 at 02 20 19](https://user-images.githubusercontent.com/6641303/216860617-8b09d9de-ca0c-4bf1-ab97-9e479646b8a9.png)
+![Simulator Screen Shot - Apple TV - 2023-02-06 at 02 51 06](https://user-images.githubusercontent.com/6641303/216863989-b1abbc20-0288-4c93-8b09-d1d85055e126.png)
+
 
 ## ▶︎ Installation
 Use SPM:
