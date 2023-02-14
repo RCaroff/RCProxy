@@ -49,10 +49,11 @@ var body: some View {
     }
 }
 ```
-+ Choose the type of storage you want between `.session` and `.userDefaults`.<br>Example: 
++ Choose the type of storage you want between `.session`, `.userDefaults` and `.database`<br>Be sure to setup this **BEFORE** calling `RCProxy.start()`.<br>Example: 
 ```
-RCProxy.storageType = .session
+RCProxy.storageType = .database
+RCProxy.start()
 ```
-<br>Default value is `.userDefaults`.<br><br>`session`: Your requests will be stored in a singleton and will be cleared when app is terminated.<br>`userDefaults`: Your requests will be stored in `UserDefaults.standard` instance, and will persist even if your app crashes. This is why it's the default value.
+<br>Default value is `.session`.<br><br>`session`: Your requests will be stored in a singleton and will be cleared when app is terminated.<br>`userDefaults`: Your requests will be stored in `UserDefaults.standard` instance, and will persist between sessions but it will allow only a limited amount of data.<br>`.database`: Your requests will be stored in a sqlite file on the phone. It uses CoreData behind the hood.
 
 Feel free to contribute and / or open issues!
