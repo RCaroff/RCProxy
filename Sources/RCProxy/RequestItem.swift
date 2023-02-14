@@ -51,6 +51,13 @@ class RequestItem: Codable, Identifiable {
         URL(string: url)?.relativePath ?? ""
     }
 
+    var dateString: String {
+        let df = DateFormatter()
+        df.dateStyle = .short
+        df.timeStyle = .long
+        return df.string(from: date)
+    }
+
     init(with coreDataModel: RequestItemCD) {
         self.id = coreDataModel.id
         self.date = coreDataModel.date

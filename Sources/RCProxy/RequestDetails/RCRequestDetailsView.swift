@@ -16,13 +16,7 @@ struct RCRequestDetailsView: View {
     var body: some View {
 
         List {
-            HStack(spacing: isTV ? 24 : 8) {
-                StatusCodeBadgeView(code: "\(item.method) \(item.statusCode)", color: item.statusColor)
-                Text(item.url)
-                    .font(.system(size: isTV ? 32 : 14, weight: .regular))
-            }
-            .padding(4)
-
+            RCProxyRequestItemCell(item: item)
             Section {
                 NavigationLink {
                     RCRequestJsonView(viewModel: RCRequestJsonViewModel(
