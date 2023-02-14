@@ -67,7 +67,12 @@ final class CoreDataRequestsStorage: RequestsStorage {
     }
 
     func clear() {
-
+        let request = RequestItemCD.fetchRequest()
+        if let entities = try? context.fetch(request) {
+            entities.forEach { context.delete($0) }
+        }
+        saveContext()
+        requestItems.removeAll()
     }
 
     private func fetch() -> [RequestItem] {
