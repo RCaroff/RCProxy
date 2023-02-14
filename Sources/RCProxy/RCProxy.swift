@@ -17,9 +17,9 @@ public final class RCProxy {
         case database
     }
 
-    static var storage: RequestsStorage = UserDefaultsRequestsStorage()
+    static var storage: RequestsStorage = SessionRequestsStorage()
 
-    public static var storageType: StorageType = .userDefaults {
+    public static var storageType: StorageType = .session {
         didSet {
             switch storageType {
             case .session:
