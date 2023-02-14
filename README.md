@@ -7,13 +7,11 @@ A lightweight inapp HTTP requests logger for your iOS and tvOS apps.
 + JSON file sharing.
 + Copy a single row on long press.
 
-![Simulator Screen Shot - iPhone 14 Pro - 2023-02-06 at 02 11 21](https://user-images.githubusercontent.com/6641303/216860620-cf7852b2-cd1f-4e84-80c0-d4f47fb43755.png)
-![Simulator Screen Shot - iPhone 14 Pro - 2023-02-06 at 02 11 31](https://user-images.githubusercontent.com/6641303/216860616-36c8e1f3-ea83-4733-b281-2703664dd8b8.png)
-![Simulator Screen Shot - iPhone 14 Pro - 2023-02-06 at 02 20 19](https://user-images.githubusercontent.com/6641303/216860617-8b09d9de-ca0c-4bf1-ab97-9e479646b8a9.png)
+![Simulator Screen Recording - iPhone 14 Pro - 2023-02-14 at 02 54 19](https://user-images.githubusercontent.com/6641303/218618660-74f58036-d0f5-4000-b630-2e08e7a131bd.gif)
 
-Works on tvOS too!
-![Simulator Screen Shot - Apple TV - 2023-02-06 at 02 57 37](https://user-images.githubusercontent.com/6641303/216864803-6a78c376-6bc8-4d41-ac0a-9cf81a1e6a88.png)
-![Simulator Screen Shot - Apple TV - 2023-02-06 at 02 51 06](https://user-images.githubusercontent.com/6641303/216863989-b1abbc20-0288-4c93-8b09-d1d85055e126.png)
+Works on tvOS too!<br>
+![Simulator Screen Recording - Apple TV - 2023-02-14 at 03 00 43](https://user-images.githubusercontent.com/6641303/218619269-8f2c4c67-6de8-45f2-a225-7ea708f8116c.gif)
+
 
 
 ## ▶︎ Installation
