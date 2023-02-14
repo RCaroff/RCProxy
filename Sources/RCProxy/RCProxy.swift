@@ -14,6 +14,7 @@ public final class RCProxy {
     public enum StorageType {
         case session
         case userDefaults
+        case database
     }
 
     static var storage: RequestsStorage = UserDefaultsRequestsStorage()
@@ -25,6 +26,8 @@ public final class RCProxy {
                 storage = SessionRequestsStorage()
             case .userDefaults:
                 storage = UserDefaultsRequestsStorage()
+            case .database:
+                storage = CoreDataRequestsStorage()
             }
         }
     }

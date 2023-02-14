@@ -1,45 +1,11 @@
 //
-//  RequestsStorage.swift
-//  RCProxy
+//  UserDefaultsRequestsStorage.swift
+//  
 //
-//  Created by Rémi Caroff on 27/08/2022.
+//  Created by Rémi Caroff on 13/02/2023.
 //
 
 import Foundation
-
-struct RequestData: Hashable {
-    let id: String
-    let urlRequest: URLRequest
-    let date: Date
-}
-
-struct ResponseData: Hashable {
-    let urlResponse: HTTPURLResponse
-    let data: Data?
-}
-
-protocol RequestsStorage {
-    var requestItems: [RequestItem] { get set }
-    func store(request: RequestData)
-    func store(responseData: ResponseData, forRequestID id: String)
-    func clear()
-}
-
-final class SessionRequestsStorage: RequestsStorage {
-    var requestItems: [RequestItem] = []
-
-    func store(request: RequestData) {
-        requestItems.append(RequestItem(with: request))
-    }
-
-    func store(responseData: ResponseData, forRequestID id: String) {
-        requestItems.first(where: { $0.id == id })?.populate(with: responseData)
-    }
-
-    func clear() {
-        requestItems = []
-    }
-}
 
 final class UserDefaultsRequestsStorage: RequestsStorage {
 

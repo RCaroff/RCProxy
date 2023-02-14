@@ -11,13 +11,13 @@ import UIKit
 class RequestItem: Codable, Identifiable {
     var id: String
     var date: Date
-    let url: String
-    let method: String
-    let requestHeaders: [String: String]
+    var url: String
+    var method: String
+    var requestHeaders: [String: String]
     var responseHeaders: [String: String] = [:]
     var statusCode: Int = 0
-    let cURL: String
-    let requestBodyData: Data?
+    var cURL: String
+    var requestBodyData: Data?
     var responseBodyData: Data?
 
     var requestBody: String {
@@ -51,6 +51,19 @@ class RequestItem: Codable, Identifiable {
         URL(string: url)?.relativePath ?? ""
     }
 
+    init(with coreDataModel: RequestItemCD) {
+        self.id = coreDataModel.id
+        self.date = coreDataModel.date
+        self.url = coreDataModel.url
+        self.method = coreDataModel.method
+        self.requestHeaders = (coreDataModel.requestHeaders?.toJSONObject() as? [String: String]) ?? ["No":"Content"]
+        self.responseHeaders = (coreDataModel.responseHeaders?.toJSONObject() as? [String: String]) ?? ["No":"Content"]
+        self.statusCode = Int(coreDataModel.statusCode)
+        self.cURL = coreDataModel.cURL
+        self.requestBodyData = coreDataModel.requestBodyData
+        self.responseBodyData = coreDataModel.responseBodyData
+    }
+
     init(with requestData: RequestData) {
         id =  requestData.id
         cURL = requestData.urlRequest.cURL()
@@ -58,11 +71,12 @@ class RequestItem: Codable, Identifiable {
         method = (requestData.urlRequest.httpMethod ?? "").uppercased()
         requestBodyData = requestData.urlRequest.bodyStream()
         requestHeaders = requestData.urlRequest.allHTTPHeaderFields ?? ["No":"Content"]
-        self.date = requestData.date
+        date = requestData.date
     }
 
     func populate(with responseData: ResponseData) {
         responseBodyData = responseData.data
+        responseHeaders = responseData.urlResponse.allHeaderFields as? [String: String] ?? ["No":"Content"]
         statusCode = responseData.urlResponse.statusCode
     }
 }

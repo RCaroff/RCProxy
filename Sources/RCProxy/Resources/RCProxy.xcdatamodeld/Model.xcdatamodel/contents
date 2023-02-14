@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="21512" systemVersion="21G83" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="RequestItemCD" representedClassName="RCProxy.RequestItemCD" syncable="YES">
+        <attribute name="cURL" attributeType="String"/>
+        <attribute name="date" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="String"/>
+        <attribute name="method" attributeType="String"/>
+        <attribute name="requestBodyData" optional="YES" attributeType="Binary"/>
+        <attribute name="requestHeaders" optional="YES" attributeType="Binary"/>
+        <attribute name="responseBodyData" optional="YES" attributeType="Binary"/>
+        <attribute name="responseHeaders" optional="YES" attributeType="Binary"/>
+        <attribute name="statusCode" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="url" attributeType="String"/>
+    </entity>
+</model>
