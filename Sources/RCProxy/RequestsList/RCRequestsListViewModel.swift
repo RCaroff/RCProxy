@@ -9,9 +9,9 @@ import SwiftUI
 
 final class RCRequestsListViewModel: ObservableObject {
 
-    var storage: RequestsStorage
-
     @Published var items: [RequestItem] = []
+
+    private var storage: RequestsStorage
 
     init(storage: RequestsStorage) {
         self.storage = storage
