@@ -12,6 +12,8 @@ final class PersistentContainer: NSPersistentContainer {}
 
 final class CoreDataRequestsStorage: RequestsStorage {
 
+    private let queue = DispatchQueue(label: "RCProxy_core_data_storage", qos: .utility)
+
     private var container: NSPersistentContainer!
     private var context: NSManagedObjectContext {
         return container.viewContext
@@ -43,36 +45,42 @@ final class CoreDataRequestsStorage: RequestsStorage {
     }
 
     func store(request: RequestData) {
-        guard let cdItem = NSEntityDescription.insertNewObject(forEntityName: "RequestItemCD", into: context) as? RequestItemCD else { return }
-        let item = RequestItem(with: request)
-        cdItem.id = item.id
-        cdItem.date = item.date
-        cdItem.url = item.url
-        cdItem.method = item.method
-        cdItem.requestHeaders = (item.requestHeaders as [String: Any]).toData()
-        cdItem.requestBodyData = item.requestBodyData
-        cdItem.cURL = item.cURL
-        saveContext()
+        queue.async { [weak self, context] in
+            guard let cdItem = NSEntityDescription.insertNewObject(forEntityName: "RequestItemCD", into: context) as? RequestItemCD else { return }
+            let item = RequestItem(with: request)
+            cdItem.id = item.id
+            cdItem.date = item.date
+            cdItem.url = item.url
+            cdItem.method = item.method
+            cdItem.requestHeaders = (item.requestHeaders as [String: Any]).toData()
+            cdItem.requestBodyData = item.requestBodyData
+            cdItem.cURL = item.cURL
+            self?.saveContext()
+        }
     }
 
     func store(responseData: ResponseData, forRequestID id: String) {
-        let request = RequestItemCD.fetchRequest()
-        request.predicate = NSPredicate(format: "id LIKE %@", id)
-        guard let itemCD = try? context.fetch(request).first else { return }
-        let responseHeaders = responseData.urlResponse.allHeaderFields as? [String: Any] ?? ["No": "Content"]
-        itemCD.responseHeaders = responseHeaders.toData()
-        itemCD.responseBodyData = responseData.data
-        itemCD.statusCode = Int16(responseData.urlResponse.statusCode)
-        saveContext()
+        queue.async { [weak self, context] in
+            let request = RequestItemCD.fetchRequest()
+            request.predicate = NSPredicate(format: "id LIKE %@", id)
+            guard let itemCD = try? context.fetch(request).first else { return }
+            let responseHeaders = responseData.urlResponse.allHeaderFields as? [String: Any] ?? ["No": "Content"]
+            itemCD.responseHeaders = responseHeaders.toData()
+            itemCD.responseBodyData = responseData.data
+            itemCD.statusCode = Int16(responseData.urlResponse.statusCode)
+            self?.saveContext()
+        }
     }
 
     func clear() {
-        let request = RequestItemCD.fetchRequest()
-        if let entities = try? context.fetch(request) {
-            entities.forEach { context.delete($0) }
+        queue.async { [weak self, context] in
+            let request = RequestItemCD.fetchRequest()
+            if let entities = try? context.fetch(request) {
+                entities.forEach { context.delete($0) }
+            }
+            self?.saveContext()
+            self?.requestItems.removeAll()
         }
-        saveContext()
-        requestItems.removeAll()
     }
 
     private func fetch() -> [RequestItem] {
