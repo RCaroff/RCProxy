@@ -123,7 +123,7 @@ class RCRequestJsonViewModel: ObservableObject {
 
                 block.text = "\"\(key)\": {"
 
-            } else if let value = value as? [[String: Any]] {
+            } else if let value = value as? [Any] {
                 value.enumerated().forEach {
                     block.subBlocks.append(
                         buildBlock(
