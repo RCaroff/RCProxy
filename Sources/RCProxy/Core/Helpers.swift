@@ -30,9 +30,7 @@ extension Optional where Wrapped == Data {
 extension Data {
     func toJSON() -> String {
         do {
-            let jsonObject: AnyObject = try JSONSerialization.jsonObject(with: self) as AnyObject
-            let jsonData = try JSONSerialization.data(withJSONObject: jsonObject, options: .prettyPrinted)
-            return String(data: jsonData, encoding: .utf8) ?? "No content"
+            return try JSON.parse(data: self).toJSONString(prettyPrinted: true)
         } catch {
             return "No content"
         }
@@ -40,7 +38,7 @@ extension Data {
 
     func toJSONObject() -> [String: Any] {
         do {
-            if let jsonObject = try JSONSerialization.jsonObject(with: self) as? Dictionary<String, Any> {
+            if let jsonObject = try JSON.parse(data: self).toJSONObject() as? [String: Any] {
                 return jsonObject
             } else {
                 let jsonArray = toJSONArray()
@@ -55,9 +53,9 @@ extension Data {
         }
     }
 
-    func toJSONArray() -> [[String: Any]] {
+    func toJSONArray() -> [Any] {
         do {
-            let jsonObject: Array<Dictionary<String, Any>>? = try JSONSerialization.jsonObject(with: self) as? Array<Dictionary<String, Any>>
+            let jsonObject: [Any]? = try JSON.parse(data: self).toJSONObject() as? [Any]
             return jsonObject ?? []
         } catch {
             return []
@@ -65,7 +63,7 @@ extension Data {
     }
 }
 
-extension Dictionary<String, Any> {
+extension [String: Any] {
     func toData() -> Data? {
         return try? JSONSerialization.data(withJSONObject: self)
     }
@@ -156,7 +154,7 @@ extension URLRequest {
         guard let dat = bodyStream() else { return nil }
 
         do {
-            return try JSONSerialization.jsonObject(with: dat, options: JSONSerialization.ReadingOptions.allowFragments)
+            return try JSON.parse(data: dat).toJSONObject()
         } catch {
             print(error.localizedDescription)
             return nil
