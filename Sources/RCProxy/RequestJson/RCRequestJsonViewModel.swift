@@ -109,9 +109,9 @@ class RCRequestJsonViewModel: ObservableObject {
 
     private func buildBlock(with json: [String: Any], parentBlockId: String?, indentLevel: Int) -> JSONBlock {
         let block = JSONBlock(id: UUID().uuidString)
-        json.forEach { (key, value) in
+        json.ordered().forEach { (key, value) in
             if let value = value as? [String: Any] {
-                value.forEach { key, value in
+                value.ordered().forEach { key, value in
                     block.subBlocks.append(
                         buildBlock(
                             with: [key: value],
