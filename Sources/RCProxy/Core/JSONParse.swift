@@ -290,6 +290,7 @@ open class JSON {
      - throws: `SerializationError`
      */
     public static func parse(string: String) throws -> Value {
+        guard !string.isEmpty else { throw SerializationError.invalidJSON }
 
         let json = JSON()
 
