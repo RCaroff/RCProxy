@@ -290,8 +290,6 @@ open class JSON {
      - throws: `SerializationError`
      */
     public static func parse(string: String) throws -> Value {
-        guard !string.isEmpty else { throw SerializationError.invalidJSON }
-
         let json = JSON()
 
         var index = string.startIndex
@@ -454,7 +452,7 @@ open class JSON {
      - throws: `SerializationError`
      */
     private func arrayParser(_ jsonString: String, index: inout String.Index) throws -> [ArrayElement]? {
-        guard jsonString[index] == "[" else { return nil }
+        guard index != jsonString.endIndex, jsonString[index] == "[" else { return nil }
 
         var parsedArray = [ArrayElement]()
         index = jsonString.index(after: index)
