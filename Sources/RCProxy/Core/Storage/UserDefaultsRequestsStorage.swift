@@ -28,7 +28,7 @@ final class UserDefaultsRequestsStorage: RequestsStorage {
     func store(request: RequestData) {
         let item = RequestItem(with: request)
         var items = requestItems
-        items.append(item)
+        items.insert(item, at: 0)
         requestItems = items
     }
 

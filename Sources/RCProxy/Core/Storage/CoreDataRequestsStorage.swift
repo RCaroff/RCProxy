@@ -86,7 +86,11 @@ final class CoreDataRequestsStorage: RequestsStorage {
     private func fetch() -> [RequestItem] {
         let request = RequestItemCD.fetchRequest()
         guard let requests = try? context.fetch(request) else { return [] }
-        return requests.map { RequestItem(with: $0) }
+        return requests
+            .map { RequestItem(with: $0) }
+            .sorted { item1, item2 in
+                return item1.date > item2.date
+            }
     }
 
     private func saveContext() {

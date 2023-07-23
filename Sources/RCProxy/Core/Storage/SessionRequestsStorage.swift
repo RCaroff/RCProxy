@@ -11,7 +11,7 @@ final class SessionRequestsStorage: RequestsStorage {
     var requestItems: [RequestItem] = []
 
     func store(request: RequestData) {
-        requestItems.append(RequestItem(with: request))
+        requestItems.insert(RequestItem(with: request), at: 0)
     }
 
     func store(responseData: ResponseData, forRequestID id: String) {
