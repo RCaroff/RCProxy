@@ -14,6 +14,7 @@ struct RCRequestsListView: View {
     @ObservedObject var viewModel: RCRequestsListViewModel
     @State private var showDetails: Bool = false
     @Environment(\.dismiss) var dismiss
+    @State var showDeleteConfirmation: Bool = false
 
     var body: some View {
         if viewModel.items.isEmpty {
@@ -43,10 +44,23 @@ struct RCRequestsListView: View {
                     }
                     .navigationTitle("Requests")
                     .toolbar {
-                        Button {
-                            viewModel.clear()
-                        } label: {
-                            Image(systemName: "trash")
+                        HStack {
+                            Button {
+                                showDeleteConfirmation = true
+                            } label: {
+                                Image(systemName: "trash")
+                            }
+                            .alert("Are you sure ?", isPresented: $showDeleteConfirmation) {
+                                Button("Cancel", role: .cancel) { }
+                                Button("Delete all", role: .destructive) {
+                                    viewModel.clear()
+                                }
+                            }
+                            Button {
+                                viewModel.fetch()
+                            } label: {
+                                Image(systemName: "arrow.triangle.2.circlepath")
+                            }
                         }
                     }
                 }
