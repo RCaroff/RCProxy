@@ -14,10 +14,21 @@ final class CoreDataRequestsStorage: RequestsStorage {
 
     private let queue = DispatchQueue(label: "RCProxy_core_data_storage", qos: .utility)
 
-    private var container: NSPersistentContainer!
-    private var context: NSManagedObjectContext {
-        return container.viewContext
-    }
+    private lazy var container: NSPersistentContainer = {
+        guard let modelURL = Bundle.module.url(forResource: "RCProxy",
+                                               withExtension: "momd") else {
+            fatalError("Failed to find data model")
+        }
+        guard let mom = NSManagedObjectModel(contentsOf: modelURL) else {
+            fatalError("Failed to create model from file: \(modelURL)")
+        }
+
+        return NSPersistentContainer(name: "RCProxy", managedObjectModel: mom)
+    }()
+
+    private lazy var context: NSManagedObjectContext = {
+        return container.newBackgroundContext()
+    }()
 
     var requestItems: [RequestItem] {
         get {
@@ -28,18 +39,9 @@ final class CoreDataRequestsStorage: RequestsStorage {
     }
 
     init() {
-        guard let modelURL = Bundle.module.url(forResource: "RCProxy",
-                                               withExtension: "momd") else {
-            fatalError("Failed to find data model")
-        }
-        guard let mom = NSManagedObjectModel(contentsOf: modelURL) else {
-            fatalError("Failed to create model from file: \(modelURL)")
-        }
-
-        container = NSPersistentContainer(name: "RCProxy", managedObjectModel: mom)
         container.loadPersistentStores { store, error in
             if let error {
-                print("Unresolved error \(error)")
+                print("Failed loading persistent store: \(error)")
             }
         }
     }
