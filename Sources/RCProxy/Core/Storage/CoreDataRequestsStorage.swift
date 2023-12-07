@@ -31,10 +31,7 @@ final class CoreDataRequestsStorage: RequestsStorage {
     }()
 
     var requestItems: [RequestItem] {
-        get {
-            fetch()
-        }
-
+        get { fetch() }
         set {}
     }
 
