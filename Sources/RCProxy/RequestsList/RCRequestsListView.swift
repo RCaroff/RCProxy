@@ -44,7 +44,7 @@ struct RCRequestsListView: View {
                     }
                     .navigationTitle("Requests")
                     .toolbar {
-                        HStack {
+                        ToolbarItem(placement: .navigationBarTrailing) {
                             Button {
                                 showDeleteConfirmation = true
                             } label: {
@@ -56,6 +56,8 @@ struct RCRequestsListView: View {
                                     viewModel.clear()
                                 }
                             }
+                        }
+                        ToolbarItem(placement: .navigationBarTrailing) {
                             Button {
                                 viewModel.fetch()
                             } label: {
