@@ -19,7 +19,9 @@ final class RCRequestsListViewModel: ObservableObject {
     }
 
     func fetch() {
-        items = storage.requestItems
+        Task { @MainActor in
+            items = await storage.fetch()
+        }
     }
 
     func clear() {

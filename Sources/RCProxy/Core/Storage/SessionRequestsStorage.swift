@@ -8,7 +8,12 @@
 import Foundation
 
 final class SessionRequestsStorage: RequestsStorage {
-    var requestItems: [RequestItem] = []
+    
+    private var requestItems: [RequestItem] = []
+
+    func fetch() async -> [RequestItem] {
+        return requestItems
+    }
 
     func store(request: RequestData) {
         requestItems.insert(RequestItem(with: request), at: 0)

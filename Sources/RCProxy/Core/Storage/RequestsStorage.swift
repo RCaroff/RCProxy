@@ -20,7 +20,7 @@ struct ResponseData: Hashable {
 }
 
 protocol RequestsStorage {
-    var requestItems: [RequestItem] { get set }
+    func fetch() async -> [RequestItem]
     func store(request: RequestData)
     func store(responseData: ResponseData, forRequestID id: String)
     func clear()
