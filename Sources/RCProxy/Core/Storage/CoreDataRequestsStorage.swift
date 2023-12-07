@@ -30,12 +30,12 @@ final class CoreDataRequestsStorage: RequestsStorage {
         return container.newBackgroundContext()
     }()
 
-    var requestItems: [RequestItem] {
-        get { fetch() }
-        set {}
-    }
+    private var maxRequestsCount: UInt = 100
 
-    init() {
+    init(maxRequestsCount: UInt) {
+        if maxRequestsCount != 0 {
+            self.maxRequestsCount = maxRequestsCount
+        }
         container.loadPersistentStores { store, error in
             if let error {
                 print("Failed loading persistent store: \(error)")
@@ -78,18 +78,37 @@ final class CoreDataRequestsStorage: RequestsStorage {
                 entities.forEach { context.delete($0) }
             }
             self?.saveContext()
-            self?.requestItems.removeAll()
         }
     }
 
-    private func fetch() -> [RequestItem] {
-        let request = RequestItemCD.fetchRequest()
-        guard let requests = try? context.fetch(request) else { return [] }
-        return requests
-            .map { RequestItem(with: $0) }
-            .sorted { item1, item2 in
-                return item1.date > item2.date
+    func fetch() async -> [RequestItem] {
+        return await withCheckedContinuation { [weak self] continuation in
+            guard let self else { return }
+            let request = RequestItemCD.fetchRequest()
+            queue.async {
+                guard let requests = try? self.context.fetch(request) else {
+                    continuation.resume(returning: [])
+                    return
+                }
+                var sorted = requests
+                    .sorted { item1, item2 in
+                        return item1.date > item2.date
+                    }
+
+                if sorted.count > self.maxRequestsCount {
+                    let diff = sorted.count - Int(self.maxRequestsCount)
+                    sorted.enumerated().forEach { idx, item in
+                        if idx > self.maxRequestsCount {
+                            self.context.delete(item)
+                        }
+                    }
+                    sorted.removeLast(diff)
+                    self.saveContext()
+                }
+                let mapped = sorted.map { RequestItem(with: $0) }
+                continuation.resume(returning: mapped)
             }
+        }
     }
 
     private func saveContext() {

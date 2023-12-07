@@ -13,8 +13,8 @@ public final class RCProxy {
 
     public enum StorageType {
         case session
-        case userDefaults
-        case database
+        case userDefaults(maxRequestsCount: UInt = 100)
+        case database(maxRequestsCount: UInt = 100)
     }
 
     static var storage: RequestsStorage = SessionRequestsStorage()
@@ -24,10 +24,10 @@ public final class RCProxy {
             switch storageType {
             case .session:
                 storage = SessionRequestsStorage()
-            case .userDefaults:
-                storage = UserDefaultsRequestsStorage()
-            case .database:
-                storage = CoreDataRequestsStorage()
+            case .userDefaults(let count):
+                storage = UserDefaultsRequestsStorage(maxRequestsCount: count)
+            case .database(let count):
+                storage = CoreDataRequestsStorage(maxRequestsCount: count)
             }
         }
     }
