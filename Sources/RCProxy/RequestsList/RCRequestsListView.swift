@@ -105,28 +105,27 @@ struct RCProxyRequestItemCell: View {
 
     var body: some View {
         ZStack {
-            VStack {
-                HStack {
+            VStack(alignment: .leading, spacing: isTV ? 24 : 8) {
+                HStack(spacing: isTV ? 24 : 8) {
+                    StatusCodeBadgeView(code: "\(item.method) \(item.statusCode)", color: item.statusColor)
+
                     Text(item.dateString)
                         .font(.footnote)
                         .foregroundColor(Color(uiColor: .lightGray))
                     Spacer()
                 }
-                HStack(spacing: isTV ? 24 : 8) {
-                    StatusCodeBadgeView(code: "\(item.method) \(item.statusCode)", color: item.statusColor)
+
 #if os(iOS)
+                Text(item.url)
+                    .font(.system(size: fontSize))
+#else
+                Button {} label: {
                     Text(item.url)
                         .font(.system(size: fontSize))
-#else
-                    Button {} label: {
-                        Text(item.url)
-                            .font(.system(size: fontSize))
-                    }
-#endif
-                    Spacer()
                 }
-            }
+#endif
 
+            }
         }
         .padding(.vertical, 4)
     }
@@ -138,8 +137,9 @@ struct StatusCodeBadgeView: View {
 
     var body: some View {
         Text(code)
-            .padding(8)
+            .font(.footnote)
+            .padding(isTV ? 8 : 4)
             .background(Color(color))
-            .cornerRadius(8)
+            .cornerRadius(isTV ? 8 : 4)
     }
 }

@@ -14,7 +14,6 @@ struct RCRequestDetailsView: View {
     let item: RequestItem
 
     var body: some View {
-
         List {
             RCProxyRequestItemCell(item: item)
             Section {
@@ -73,7 +72,6 @@ struct RCRequestDetailsView: View {
             }
         }
         .padding(8)
-        .frame(maxWidth: .infinity)
         .navigationTitle(item.relativePath)
         #if os(iOS)
         .toolbar {
