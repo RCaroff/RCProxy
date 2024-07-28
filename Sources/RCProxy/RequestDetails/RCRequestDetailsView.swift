@@ -71,9 +71,8 @@ struct RCRequestDetailsView: View {
                     .padding()
             }
         }
-        .padding(8)
         .navigationTitle(item.relativePath)
-        #if os(iOS)
+#if os(iOS)
         .toolbar {
             Button(action: {
                 isSharing = true
@@ -87,7 +86,8 @@ struct RCRequestDetailsView: View {
         .sheet(isPresented: $isSharing, content: {
             ShareSheetView(activityItems: [item.cURL])
         })
-        #endif
+#endif
+
     }
 
     func jsonTitle(withSuffix suffix: String) -> String {
