@@ -110,20 +110,11 @@ class RCRequestJsonViewModel: ObservableObject {
     private func buildBlock(with json: [String: Any], parentBlockId: String?, indentLevel: Int) -> JSONBlock {
         let block = JSONBlock(id: UUID().uuidString)
         json.ordered().forEach { (key, value) in
-            if let value = value as? [String: Any] {
-                value.ordered().forEach { key, value in
-                    block.subBlocks.append(
-                        buildBlock(
-                            with: [key: value],
-                            parentBlockId: block.id,
-                            indentLevel: indentLevel+1
-                        )
-                    )
+            if let value = value as? [Any] {
+                if value.isEmpty {
+                    block.text = "[ 0 element ]"
+                    return
                 }
-
-                block.text = "\"\(key)\": {"
-
-            } else if let value = value as? [Any] {
                 value.enumerated().forEach {
                     block.subBlocks.append(
                         buildBlock(
@@ -139,6 +130,26 @@ class RCRequestJsonViewModel: ObservableObject {
                     block.text = "\"\(key)\": [ \(value.count) element\(value.count > 1 ? "s" : "") ]"
                 }
 
+            } else if let value = value as? [String: Any] {
+                if value.isEmpty {
+                    block.text = "\"\(key)\": {}"
+                    return
+                }
+
+                value.ordered().forEach { key, value in
+                    block.subBlocks.append(
+                        buildBlock(
+                            with: [key: value],
+                            parentBlockId: block.id,
+                            indentLevel: indentLevel+1
+                        )
+                    )
+                }
+
+                block.text = "\"\(key)\": {"
+
+            } else if value is String {
+                block.text = "\"\(key)\": \"\(value)\""
             } else {
                 block.text = "\"\(key)\": \(value)"
             }

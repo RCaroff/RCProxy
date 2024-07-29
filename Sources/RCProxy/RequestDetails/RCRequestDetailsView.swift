@@ -84,7 +84,7 @@ struct RCRequestDetailsView: View {
             })
         }
         .sheet(isPresented: $isSharing, content: {
-            ShareSheetView(activityItems: [item.cURL])
+            ShareSheetView(activityItems: [item.cURL], callback: nil)
         })
 #endif
 

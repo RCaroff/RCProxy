@@ -8,7 +8,6 @@
 import Foundation
 import SwiftUI
 
-#if os(iOS)
 @available(tvOS, unavailable)
 struct ShareSheetView: UIViewControllerRepresentable {
 
@@ -20,7 +19,7 @@ struct ShareSheetView: UIViewControllerRepresentable {
     let activityItems: [Any]
     let applicationActivities: [UIActivity]? = nil
     let excludedActivityTypes: [UIActivity.ActivityType]? = nil
-    let callback: Callback? = nil
+    let callback: Callback?
 
     func makeUIViewController(context: Context) -> UIActivityViewController {
         let controller = UIActivityViewController(
@@ -34,5 +33,6 @@ struct ShareSheetView: UIViewControllerRepresentable {
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {
         // nothing to do here
     }
+
+    
 }
-#endif
