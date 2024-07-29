@@ -57,7 +57,11 @@ struct RCRequestJsonView: View {
         }
         .sheet(isPresented: $isSharing, content: {
             if let url = viewModel.prettyJson.toJSONFile(withName: viewModel.jsonTitle) {
-                ShareSheetView(activityItems: [url])
+                ShareSheetView(activityItems: [url], callback: { (actType, _, _ , _) in
+                    if actType == .copyToPasteboard {
+                        UIPasteboard.general.string = viewModel.prettyJson
+                    }
+                })
             }
         })
 #endif
