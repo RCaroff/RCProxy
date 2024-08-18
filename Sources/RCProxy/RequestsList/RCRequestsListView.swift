@@ -28,31 +28,35 @@ struct RequestsEmptyView: View {
     }
 }
 
+
 struct RCRequestsListView: View {
     @ObservedObject var viewModel: RCRequestsListViewModel
     @State private var showDetails: Bool = false
-
     @State var showDeleteConfirmation: Bool = false
 
     var body: some View {
         if #available(iOS 16.0, tvOS 16.0, *) {
             NavigationStack {
-                Group {
-                    if viewModel.items.isEmpty {
-                        RequestsEmptyView()
-                    } else {
-                        List {
-                            ForEach(viewModel.items) { item in
-                                ZStack {
-                                    NavigationLink("") {
-                                        RCRequestDetailsView(item: item)
-                                    }
-                                    RCProxyRequestItemCell(item: item)
-                                }
+                List {
+                    ForEach(viewModel.items) { item in
+                        ZStack {
+                            NavigationLink("") {
+                                RCRequestDetailsView(item: item)
                             }
+                            RCProxyRequestItemCell(item: item)
                         }
                     }
                 }
+#if os(iOS)
+                .searchable(text: $viewModel.search)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .overlay {
+                    if viewModel.items.isEmpty {
+                        RequestsEmptyView()
+                    }
+                }
+#endif
                 .navigationTitle("Requests")
                 .toolbar {
                     ToolbarItem(placement: .topBarTrailing) {
@@ -69,6 +73,7 @@ struct RCRequestsListView: View {
                             }
                         }
                     }
+
                     ToolbarItem(placement: .topBarTrailing) {
                         Button {
                             viewModel.fetch()
@@ -80,10 +85,10 @@ struct RCRequestsListView: View {
 
                     ToolbarItem(placement: .topBarLeading) {
                         Button {
-                            viewModel.toggleErrorFiltering()
+                            viewModel.toggleErrorFilter()
                         } label: {
                             Group {
-                                if viewModel.isFiltered {
+                                if viewModel.isErrorFiltered {
                                     Image(systemName: "exclamationmark.octagon.fill")
                                 } else {
                                     Image(systemName: "exclamationmark.octagon")
@@ -91,6 +96,21 @@ struct RCRequestsListView: View {
                             }
                         }
                         .tint(.red)
+                    }
+
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            viewModel.toggleSuccessFilter()
+                        } label: {
+                            Group {
+                                if viewModel.isSuccessFiltered {
+                                    Image(systemName: "checkmark.diamond.fill")
+                                } else {
+                                    Image(systemName: "checkmark.diamond")
+                                }
+                            }
+                        }
+                        .tint(.green)
                     }
                 }
             }
