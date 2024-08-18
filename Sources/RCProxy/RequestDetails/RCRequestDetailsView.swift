@@ -15,7 +15,7 @@ struct RCRequestDetailsView: View {
 
     var body: some View {
         List {
-            RCProxyRequestItemCell(item: item)
+            RCRequestItemCell(item: item)
             Section {
                 NavigationLink {
                     RCRequestJsonView(viewModel: RCRequestJsonViewModel(

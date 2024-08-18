@@ -28,7 +28,61 @@ struct RequestsEmptyView: View {
     }
 }
 
+struct FilterViewTV: View {
+    let buttonSize: CGFloat = 60.0
+
+    @Binding var isErrorFiltered: Bool
+    @Binding var isSuccessFiltered: Bool
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 100) {
+            Button {
+                isErrorFiltered.toggle()
+            } label: {
+                Group {
+                    if isErrorFiltered {
+                        Image(systemName: "exclamationmark.octagon.fill")
+                            .resizable()
+                    } else {
+                        Image(systemName: "exclamationmark.octagon")
+                            .resizable()
+                    }
+                }
+                .fixedSize()
+                .frame(width: buttonSize, height: buttonSize, alignment: .center)
+            }
+            .tint(.red)
+            .fixedSize()
+            .frame(width: buttonSize, height: buttonSize, alignment: .center)
+
+            Button {
+                isSuccessFiltered.toggle()
+            } label: {
+                Group {
+                    if isSuccessFiltered {
+                        Image(systemName: "checkmark.diamond.fill")
+                            .resizable()
+                    } else {
+                        Image(systemName: "checkmark.diamond")
+                            .resizable()
+                    }
+                }
+                .fixedSize()
+                .frame(width: buttonSize, height: buttonSize, alignment: .center)
+            }
+            .tint(.green)
+
+
+        }
+        .buttonStyle(.bordered)
+        .padding()
+
+    }
+}
+
 struct FilterView: View {
+
+    let buttonSize: CGFloat = 35.0
 
     @Binding var isErrorFiltered: Bool
     @Binding var isSuccessFiltered: Bool
@@ -41,106 +95,122 @@ struct FilterView: View {
                 Group {
                     if isErrorFiltered {
                         Image(systemName: "exclamationmark.octagon.fill")
+                            .resizable()
                     } else {
                         Image(systemName: "exclamationmark.octagon")
+                            .resizable()
                     }
                 }
+                .padding(8)
             }
             .tint(.red)
+            .frame(width: buttonSize, height: buttonSize)
+
             Button {
                 isSuccessFiltered.toggle()
             } label: {
                 Group {
                     if isSuccessFiltered {
                         Image(systemName: "checkmark.diamond.fill")
+                            .resizable()
                     } else {
+
                         Image(systemName: "checkmark.diamond")
+                            .resizable()
                     }
                 }
+                .padding(7)
             }
             .tint(.green)
+            .frame(width: buttonSize, height: buttonSize)
         }
+
     }
 }
 
-struct ListView: View {
-    @Binding var items: [RequestItem]
-    @Binding var isErrorFiltered: Bool
-    @Binding var isSuccessFiltered: Bool
+struct ListContentView: View {
 
-    var body: some View {
-        List {
-            Section {
-                ForEach(items) { item in
-                    ZStack {
-                        NavigationLink("") {
-                            RCRequestDetailsView(item: item)
-                        }
-                        RCProxyRequestItemCell(item: item)
-                    }
-                }
-            } header: {
-                FilterView(
-                    isErrorFiltered: $isErrorFiltered,
-                    isSuccessFiltered: $isSuccessFiltered
-                )
-            }
-        }
-#if os(iOS)
-        .textInputAutocapitalization(.never)
-        .autocorrectionDisabled()
-        .overlay {
-            if items.isEmpty {
-                RequestsEmptyView()
-            }
-        }
-#endif
-    }
-}
-
-
-struct RCRequestsListView: View {
     @ObservedObject var viewModel: RCRequestsListViewModel
     @State private var showDetails: Bool = false
     @State var showDeleteConfirmation: Bool = false
 
     var body: some View {
-        if #available(iOS 16.0, tvOS 16.0, *) {
-            NavigationStack {
-                ListView(
-                    items: $viewModel.items,
-                    isErrorFiltered: $viewModel.isErrorFiltered,
-                    isSuccessFiltered: $viewModel.isSuccessFiltered
-                )
-#if os(iOS)
-                .searchable(text: $viewModel.searchText)
-#endif
-                .navigationTitle("Requests")
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            showDeleteConfirmation = true
-                        } label: {
-                            Image(systemName: "trash")
+        List {
+            Section {
+                ForEach(viewModel.items) { item in
+                    ZStack {
+                        NavigationLink("") {
+                            RCRequestDetailsView(item: item)
                         }
-                        .tint(.white)
-                        .alert("Are you sure ?", isPresented: $showDeleteConfirmation) {
-                            Button("Cancel", role: .cancel) { }
-                            Button("Delete all", role: .destructive) {
-                                viewModel.clear()
-                            }
-                        }
-                    }
-
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            viewModel.fetch()
-                        } label: {
-                            Image(systemName: "arrow.triangle.2.circlepath")
-                        }
-                        .tint(.white)
+                        RCRequestItemCell(item: item)
                     }
                 }
+            } header: {
+                HStack {
+                    Spacer()
+#if os(iOS)
+                    FilterView(
+                        isErrorFiltered: $viewModel.isErrorFiltered,
+                        isSuccessFiltered: $viewModel.isSuccessFiltered
+                    )
+#else
+                    FilterViewTV(
+                        isErrorFiltered: $viewModel.isErrorFiltered,
+                        isSuccessFiltered: $viewModel.isSuccessFiltered
+                    )
+#endif
+                    Spacer()
+                }
+            }
+        }
+        .listStyle(PlainListStyle())
+#if os(iOS)
+        .searchable(text: $viewModel.searchText)
+        .textInputAutocapitalization(.never)
+        .autocorrectionDisabled()
+#endif
+        .overlay {
+            if viewModel.items.isEmpty {
+                RequestsEmptyView()
+            }
+        }
+        .navigationTitle("Requests")
+        .toolbar {
+            ToolbarItem(placement: .topBarLeading) {
+                Button {
+                    showDeleteConfirmation = true
+                } label: {
+                    Image(systemName: "trash")
+                }
+                .alert("Are you sure ?", isPresented: $showDeleteConfirmation) {
+                    Button("Cancel", role: .cancel) { }
+                    Button("Delete all", role: .destructive) {
+                        viewModel.clear()
+                    }
+                }
+            }
+
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    viewModel.fetch()
+                } label: {
+                    Image(systemName: "arrow.triangle.2.circlepath")
+                }
+            }
+        }
+        .tint(.white)
+    }
+
+}
+
+
+struct RCRequestsListView: View {
+    @ObservedObject var viewModel: RCRequestsListViewModel
+
+    var body: some View {
+        if #available(iOS 16.0, tvOS 16.0, *) {
+            NavigationStack {
+                ListContentView(viewModel: viewModel)
             }
             .tint(.white)
 #if os(iOS)
@@ -148,17 +218,7 @@ struct RCRequestsListView: View {
 #endif
         } else {
             NavigationView {
-                List {
-                    ForEach(viewModel.items) { item in
-                        ZStack {
-                            NavigationLink("") {
-                                RCRequestDetailsView(item: item)
-                            }
-                            RCProxyRequestItemCell(item: item)
-                        }
-                    }
-                }
-                .navigationTitle("Requests")
+                ListContentView(viewModel: viewModel)
             }
             .navigationViewStyle(.stack)
 #if os(iOS)
@@ -169,7 +229,7 @@ struct RCRequestsListView: View {
     }
 }
 
-struct RCProxyRequestItemCell: View {
+struct RCRequestItemCell: View {
     let item: RequestItem
 
     var fontSize: CGFloat {
