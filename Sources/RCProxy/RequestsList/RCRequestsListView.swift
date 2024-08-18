@@ -28,6 +28,76 @@ struct RequestsEmptyView: View {
     }
 }
 
+struct FilterView: View {
+
+    @Binding var isErrorFiltered: Bool
+    @Binding var isSuccessFiltered: Bool
+
+    var body: some View {
+        HStack {
+            Button {
+                isErrorFiltered.toggle()
+            } label: {
+                Group {
+                    if isErrorFiltered {
+                        Image(systemName: "exclamationmark.octagon.fill")
+                    } else {
+                        Image(systemName: "exclamationmark.octagon")
+                    }
+                }
+            }
+            .tint(.red)
+            Button {
+                isSuccessFiltered.toggle()
+            } label: {
+                Group {
+                    if isSuccessFiltered {
+                        Image(systemName: "checkmark.diamond.fill")
+                    } else {
+                        Image(systemName: "checkmark.diamond")
+                    }
+                }
+            }
+            .tint(.green)
+        }
+    }
+}
+
+struct ListView: View {
+    @Binding var items: [RequestItem]
+    @Binding var isErrorFiltered: Bool
+    @Binding var isSuccessFiltered: Bool
+
+    var body: some View {
+        List {
+            Section {
+                ForEach(items) { item in
+                    ZStack {
+                        NavigationLink("") {
+                            RCRequestDetailsView(item: item)
+                        }
+                        RCProxyRequestItemCell(item: item)
+                    }
+                }
+            } header: {
+                FilterView(
+                    isErrorFiltered: $isErrorFiltered,
+                    isSuccessFiltered: $isSuccessFiltered
+                )
+            }
+        }
+#if os(iOS)
+        .textInputAutocapitalization(.never)
+        .autocorrectionDisabled()
+        .overlay {
+            if items.isEmpty {
+                RequestsEmptyView()
+            }
+        }
+#endif
+    }
+}
+
 
 struct RCRequestsListView: View {
     @ObservedObject var viewModel: RCRequestsListViewModel
@@ -37,25 +107,13 @@ struct RCRequestsListView: View {
     var body: some View {
         if #available(iOS 16.0, tvOS 16.0, *) {
             NavigationStack {
-                List {
-                    ForEach(viewModel.items) { item in
-                        ZStack {
-                            NavigationLink("") {
-                                RCRequestDetailsView(item: item)
-                            }
-                            RCProxyRequestItemCell(item: item)
-                        }
-                    }
-                }
+                ListView(
+                    items: $viewModel.items,
+                    isErrorFiltered: $viewModel.isErrorFiltered,
+                    isSuccessFiltered: $viewModel.isSuccessFiltered
+                )
 #if os(iOS)
-                .searchable(text: $viewModel.search)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-                .overlay {
-                    if viewModel.items.isEmpty {
-                        RequestsEmptyView()
-                    }
-                }
+                .searchable(text: $viewModel.searchText)
 #endif
                 .navigationTitle("Requests")
                 .toolbar {
@@ -81,36 +139,6 @@ struct RCRequestsListView: View {
                             Image(systemName: "arrow.triangle.2.circlepath")
                         }
                         .tint(.white)
-                    }
-
-                    ToolbarItem(placement: .topBarLeading) {
-                        Button {
-                            viewModel.toggleErrorFilter()
-                        } label: {
-                            Group {
-                                if viewModel.isErrorFiltered {
-                                    Image(systemName: "exclamationmark.octagon.fill")
-                                } else {
-                                    Image(systemName: "exclamationmark.octagon")
-                                }
-                            }
-                        }
-                        .tint(.red)
-                    }
-
-                    ToolbarItem(placement: .topBarLeading) {
-                        Button {
-                            viewModel.toggleSuccessFilter()
-                        } label: {
-                            Group {
-                                if viewModel.isSuccessFiltered {
-                                    Image(systemName: "checkmark.diamond.fill")
-                                } else {
-                                    Image(systemName: "checkmark.diamond")
-                                }
-                            }
-                        }
-                        .tint(.green)
                     }
                 }
             }

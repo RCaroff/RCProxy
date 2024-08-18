@@ -10,15 +10,24 @@ import SwiftUI
 final class RCRequestsListViewModel: ObservableObject {
 
     @Published var items: [RequestItem] = []
-    @Published var isErrorFiltered: Bool = false
-    @Published var isSuccessFiltered: Bool = false
-    @Published var search: String = "" {
+    @Published var isErrorFiltered: Bool = false {
+        didSet {
+            toggleErrorFilter()
+        }
+    }
+    @Published var isSuccessFiltered: Bool = false {
+        didSet {
+            toggleSuccessFilter()
+        }
+    }
+    @Published var searchText: String = "" {
         didSet {
             filterSearch()
         }
     }
 
     private var allItems: [RequestItem] = []
+    private var filteredItems: [RequestItem] = []
 
     private var storage: RequestsStorage
 
@@ -40,56 +49,57 @@ final class RCRequestsListViewModel: ObservableObject {
     }
 
     func toggleErrorFilter() {
-        isErrorFiltered.toggle()
         if isErrorFiltered {
             if isSuccessFiltered {
-                toggleSuccessFilter()
+                isSuccessFiltered = false
             }
 
-            items = allItems.filter({
+            filteredItems = allItems.filter({
                 $0.statusCode >= 400 || $0.statusCode == 0
             })
-        } else {
-            items = allItems
+
+            items = filteredItems
         }
+
+        filterSearch()
     }
 
     func toggleSuccessFilter() {
-        isSuccessFiltered.toggle()
         if isSuccessFiltered {
             if isErrorFiltered {
-                toggleErrorFilter()
+                isErrorFiltered = false
             }
 
-            items = allItems.filter({
+            filteredItems = allItems.filter({
                 $0.statusCode < 400 && $0.statusCode != 0
             })
 
-        } else {
-            items = allItems
+            items = filteredItems
         }
-    }
 
-    func clearSearch() {
-        search = ""
+        filterSearch()
     }
 
     private func filterSearch() {
-        if isErrorFiltered {
-            toggleErrorFilter()
+        if searchText.isEmpty {
+            if isErrorFiltered || isSuccessFiltered {
+                items = filteredItems
+            } else {
+                items = allItems
+            }
+
+        } else {
+            if isErrorFiltered || isSuccessFiltered {
+                items = filteredItems.filter {
+                    $0.url.localizedStandardContains(searchText)
+                }
+            } else {
+                items = allItems.filter {
+                    $0.url.localizedStandardContains(searchText)
+                }
+            }
         }
 
-        if isSuccessFiltered {
-            toggleSuccessFilter()
-        }
 
-        if search.count == 0 {
-            items = allItems
-            return
-        }
-
-        items = allItems.filter {
-            $0.url.localizedStandardContains(search)
-        }
     }
 }
