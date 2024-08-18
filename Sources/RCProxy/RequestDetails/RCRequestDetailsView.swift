@@ -38,7 +38,7 @@ struct RCRequestDetailsView: View {
                         .font(.system(size: isTV ? 24 : 16, weight: .regular))
                 }
             } header: {
-                Text("⬆️ Request")
+                Text("▲ Request")
                     .font(.system(size: isTV ? 32 : 20, weight: .bold))
                     .padding()
             }
@@ -66,7 +66,7 @@ struct RCRequestDetailsView: View {
                         .font(.system(size: isTV ? 24 : 16, weight: .regular))
                 }
             } header: {
-                Text("⬇️ Response")
+                Text("▼ Response")
                     .font(.system(size: isTV ? 32 : 20, weight: .bold))
                     .padding()
             }

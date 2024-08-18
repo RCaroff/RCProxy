@@ -15,7 +15,7 @@ struct RequestsEmptyView: View {
 
     var body: some View {
         VStack {
-            Text("🤷‍♀️")
+            Text("{ }")
                 .font(.title)
             Text("No request")
             Button {
@@ -23,6 +23,7 @@ struct RequestsEmptyView: View {
             } label: {
                 Text("Close")
             }
+            .buttonStyle(.bordered)
             .padding()
         }
     }
@@ -174,7 +175,7 @@ struct ListContentView: View {
                 RequestsEmptyView()
             }
         }
-        .navigationTitle("Requests")
+        .navigationTitle("▶︎ Requests")
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button {
