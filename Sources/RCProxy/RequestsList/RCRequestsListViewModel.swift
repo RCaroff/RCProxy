@@ -12,17 +12,17 @@ final class RCRequestsListViewModel: ObservableObject {
     @Published var items: [RequestItem] = []
     @Published var isErrorFiltered: Bool = false {
         didSet {
-            toggleErrorFilter()
+            processErrorFiltering()
         }
     }
     @Published var isSuccessFiltered: Bool = false {
         didSet {
-            toggleSuccessFilter()
+            processSuccessFiltering()
         }
     }
     @Published var searchText: String = "" {
         didSet {
-            filterSearch()
+            processSearchFiltering()
         }
     }
 
@@ -37,18 +37,32 @@ final class RCRequestsListViewModel: ObservableObject {
     }
 
     func fetch() {
+
         Task { @MainActor in
-            items = await storage.fetch()
-            allItems = items
+            allItems = await storage.fetch()
+
+            if isErrorFiltered {
+                processErrorFiltering()
+                return
+            }
+
+            if isSuccessFiltered {
+                processSuccessFiltering()
+                return
+            }
+
+            processSearchFiltering()
         }
     }
 
     func clear() {
-        items = []
         storage.clear()
+        items = []
+        allItems = []
+        filteredItems = []
     }
 
-    func toggleErrorFilter() {
+    private func processErrorFiltering() {
         if isErrorFiltered {
             if isSuccessFiltered {
                 isSuccessFiltered = false
@@ -61,10 +75,10 @@ final class RCRequestsListViewModel: ObservableObject {
             items = filteredItems
         }
 
-        filterSearch()
+        processSearchFiltering()
     }
 
-    func toggleSuccessFilter() {
+    private func processSuccessFiltering() {
         if isSuccessFiltered {
             if isErrorFiltered {
                 isErrorFiltered = false
@@ -77,10 +91,10 @@ final class RCRequestsListViewModel: ObservableObject {
             items = filteredItems
         }
 
-        filterSearch()
+        processSearchFiltering()
     }
 
-    private func filterSearch() {
+    private func processSearchFiltering() {
         if searchText.isEmpty {
             if isErrorFiltered || isSuccessFiltered {
                 items = filteredItems
@@ -99,7 +113,6 @@ final class RCRequestsListViewModel: ObservableObject {
                 }
             }
         }
-
 
     }
 }
