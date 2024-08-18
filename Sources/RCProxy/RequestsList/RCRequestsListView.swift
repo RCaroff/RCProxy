@@ -134,17 +134,22 @@ struct ListContentView: View {
     @ObservedObject var viewModel: RCRequestsListViewModel
     @State private var showDetails: Bool = false
     @State var showDeleteConfirmation: Bool = false
+    @State var showCopiedToast: Bool = false
+    @State var isTapActive: Bool = false
 
     var body: some View {
         List {
             Section {
                 ForEach(viewModel.items) { item in
                     ZStack {
-                        NavigationLink("") {
-                            RCRequestDetailsView(item: item)
-                        }
-                        RCRequestItemCell(item: item)
+                        RCRequestItemCell(item: item, navigationEnabled: true, onLongPress: {
+#if os(iOS)
+                            UIPasteboard.general.string = item.url
+                            showCopiedToast = true
+#endif
+                        })
                     }
+
                 }
             } header: {
                 HStack {
@@ -200,6 +205,7 @@ struct ListContentView: View {
             }
         }
         .tint(.white)
+        .toast(message: "URL copied", isShowing: $showCopiedToast, duration: Toast.short)
     }
 
 }
@@ -207,6 +213,7 @@ struct ListContentView: View {
 
 struct RCRequestsListView: View {
     @ObservedObject var viewModel: RCRequestsListViewModel
+    @State var showCopiedToast: Bool = false
 
     var body: some View {
         if #available(iOS 16.0, tvOS 16.0, *) {
@@ -233,6 +240,11 @@ struct RCRequestsListView: View {
 struct RCRequestItemCell: View {
     let item: RequestItem
 
+    var navigationEnabled: Bool = false
+    var onLongPress: () -> Void
+
+    @State var isTapActive: Bool = false
+
     var fontSize: CGFloat {
         if isTV {
             return 24
@@ -251,7 +263,6 @@ struct RCRequestItemCell: View {
                         .foregroundColor(Color(uiColor: .lightGray))
                     Spacer()
                 }
-
 #if os(iOS)
                 Text(item.url)
                     .font(.system(size: fontSize))
@@ -261,10 +272,26 @@ struct RCRequestItemCell: View {
                         .font(.system(size: fontSize))
                 }
 #endif
-
+            }
+        }
+        .background {
+            if navigationEnabled {
+                NavigationLink("", isActive: $isTapActive) {
+                    RCRequestDetailsView(item: item)
+                }
             }
         }
         .padding(.vertical, 4)
+#if os(iOS)
+        .onTapGesture {
+            isTapActive.toggle()
+        }
+        .onLongPressGesture {
+            UIImpactFeedbackGenerator(style: .rigid)
+                .impactOccurred()
+            onLongPress()
+        }
+#endif
     }
 }
 

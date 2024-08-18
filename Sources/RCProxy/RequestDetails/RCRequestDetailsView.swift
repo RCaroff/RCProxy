@@ -10,12 +10,18 @@ import SwiftUI
 struct RCRequestDetailsView: View {
 
     @State var isSharing: Bool = false
+    @State var showCopiedToast: Bool = false
 
     let item: RequestItem
 
     var body: some View {
         List {
-            RCRequestItemCell(item: item)
+            RCRequestItemCell(item: item, onLongPress: {
+#if os(iOS)
+                UIPasteboard.general.string = item.url
+                showCopiedToast = true
+#endif
+            })
             Section {
                 NavigationLink {
                     RCRequestJsonView(viewModel: RCRequestJsonViewModel(
@@ -86,6 +92,7 @@ struct RCRequestDetailsView: View {
         .sheet(isPresented: $isSharing, content: {
             ShareSheetView(activityItems: [item.cURL], callback: nil)
         })
+        .toast(message: "URL copied", isShowing: $showCopiedToast, duration: Toast.short)
 #endif
 
     }
