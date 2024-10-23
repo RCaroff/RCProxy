@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
   s.name             = 'RCProxy'
   s.version          = '2.1.1'
   s.summary          = 'A lightweight inapp HTTP requests logger for your iOS and tvOS apps.'
-
+  s.swift_version    = '5.0'
 # This description is used to generate tags and improve search results.
 #   * Think: What does it do? Why did you write it? What is the focus?
 #   * Try to keep it short, snappy and to the point.
@@ -22,21 +22,16 @@ RCProxy will log all your HTTP requests inapp, with an expand / collapse JSON UI
                        DESC
 
   s.homepage         = 'https://github.com/RCaroff/RCProxy'
-  # s.screenshots     = 'www.example.com/screenshots_1', 'www.example.com/screenshots_2'
+  s.screenshots     = 'https://github.com/user-attachments/assets/4f473b6c-cc93-4aaa-a50b-9cca4fb34b9f', 'https://github.com/user-attachments/assets/29b548ec-75bc-454a-9896-c6fa68bdf6c4'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'RCaroff' => 'rcaroff@icloud.com' }
-  s.source           = { :git => 'https://github.com/RCaroff/RCProxy.git', :tag => s.version.to_s }
-  # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
+  s.source           = { :git => 'https://github.com/RCaroff/RCProxy.git', :tag => s.version }
 
   s.ios.deployment_target = '15.0'
+  s.tvos.deployment_target = '15.0'
 
-  s.source_files = 'Sources/**/*'
-  
-  # s.resource_bundles = {
-  #   'RCProxy' => ['RCProxy/Assets/*.png']
-  # }
+  s.source_files = 'Sources/**/*.swift'
+  s.resources = "Sources/RCProxy/Resources/*.xcdatamodeld"
+  s.frameworks = 'SwiftUI', 'CoreData'
 
-  # s.public_header_files = 'Pod/Classes/**/*.h'
-  s.frameworks = 'UIKit', 'SwiftUI'
-  # s.dependency 'AFNetworking', '~> 2.3'
 end

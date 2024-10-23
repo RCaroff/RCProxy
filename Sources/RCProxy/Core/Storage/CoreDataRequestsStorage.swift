@@ -12,13 +12,19 @@ final class PersistentContainer: NSPersistentContainer {}
 
 final class CoreDataRequestsStorage: RequestsStorage {
 
-    private let queue = DispatchQueue(label: "RCProxy_core_data_storage", qos: .utility)
+    private let queue = DispatchQueue(label: "RCProxy_core_data_storage", qos: .default)
 
     private lazy var container: NSPersistentContainer = {
-        guard let modelURL = Bundle.module.url(forResource: "RCProxy",
-                                               withExtension: "momd") else {
+
+#if SWIFT_PACKAGE
+        guard let modelURL = Bundle.module.url(forResource: "RCProxy", withExtension: "momd") else {
             fatalError("Failed to find data model")
         }
+#else
+        guard let modelURL = Bundle(for: RCProxy.self).url(forResource: "RCProxy", withExtension: "momd") else {
+            fatalError("Failed to find data model")
+        }
+#endif
         guard let mom = NSManagedObjectModel(contentsOf: modelURL) else {
             fatalError("Failed to create model from file: \(modelURL)")
         }

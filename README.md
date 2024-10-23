@@ -1,5 +1,7 @@
-# ⬆️ RCProxy ⬇️
-A lightweight inapp HTTP requests logger for your iOS and tvOS apps.
+<div align="center">
+  <h1>▶︎ RCProxy</h1>
+  <h3>A lightweight inapp HTTP requests logger for your iOS and tvOS apps.</h3>
+</div>
 
 + Simply log requests in your app with 2 lines of code.
 + Magnified JSON view.
@@ -7,14 +9,18 @@ A lightweight inapp HTTP requests logger for your iOS and tvOS apps.
 + JSON file sharing.
 + Copy a single row on long press.
 
-![Simulator Screen Recording - iPhone 14 Pro - 2023-02-14 at 02 54 19](https://user-images.githubusercontent.com/6641303/218618660-74f58036-d0f5-4000-b630-2e08e7a131bd.gif)
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/4f473b6c-cc93-4aaa-a50b-9cca4fb34b9f" alt="iPhone 15 Pro Screenshot" width="187" style="display: inline-block;"/>
+  <img src="https://github.com/user-attachments/assets/29b548ec-75bc-454a-9896-c6fa68bdf6c4" alt="Apple TV Screenshot" width="720" style="display: inline-block;"/>
+</div>
 
-Works on tvOS too!<br>
-![Simulator Screen Recording - Apple TV - 2023-02-14 at 03 00 43](https://user-images.githubusercontent.com/6641303/218619269-8f2c4c67-6de8-45f2-a225-7ea708f8116c.gif)
+## ▼ Installation
+Use Cocoapods:
 
+```
+pod 'RCProxy'
+```
 
-
-## ▶︎ Installation
 Use SPM:
 
 1. In Xcode, go to File -> Add packages...
@@ -47,11 +53,11 @@ var body: some View {
     }
 }
 ```
-+ Choose the type of storage you want between `.session`, `.userDefaults` and `.database`<br>Be sure to setup this **BEFORE** calling `RCProxy.start()`.<br>Example: 
++ Choose the type of storage you want between `.session`, `.userDefaults()` and `.database()`<br>Be sure to setup this **BEFORE** calling `RCProxy.start()`.<br><br>Example: 
 ```
-RCProxy.storageType = .database
+RCProxy.storageType = .database(maxRequestsCount: 50)
 RCProxy.start()
 ```
-<br>Default value is `.session`.<br><br>`session`: Your requests will be stored in a singleton and will be cleared when app is terminated.<br>`userDefaults`: Your requests will be stored in `UserDefaults.standard` instance, and will persist between sessions but it will allow only a limited amount of data.<br>`.database`: Your requests will be stored in a sqlite file on the phone. It uses CoreData behind the hood.
+<br>Default value is `.session`.<br><br>`session`: Your requests will be stored in a singleton and will be cleared when app is terminated.<br>`userDefaults(maxRequestsCount: //default: 100)`: Your requests will be stored in `UserDefaults.standard` instance, and will persist between sessions but it will allow only a limited amount of data.<br>`.database(maxRequestsCount: //default: 100)`: Your requests will be stored in a sqlite file on the phone. It uses CoreData behind the hood.
 
 Feel free to contribute and / or open issues!
