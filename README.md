@@ -11,9 +11,8 @@
 
 <div align="center">
   <img src="https://github.com/user-attachments/assets/4f473b6c-cc93-4aaa-a50b-9cca4fb34b9f" alt="iPhone 15 Pro Screenshot" width="187" style="display: inline-block;"/>
-  <img src="https://user-images.githubusercontent.com/6641303/218619269-8f2c4c67-6de8-45f2-a225-7ea708f8116c.gif" alt="Apple TV Screenshot" width="720" style="display: inline-block;"/>
+  <img src="https://github.com/user-attachments/assets/29b548ec-75bc-454a-9896-c6fa68bdf6c4" alt="Apple TV Screenshot" width="720" style="display: inline-block;"/>
 </div>
-
 
 ## ▼ Installation
 Use Cocoapods:
