@@ -26,17 +26,11 @@ RCProxy will log all your HTTP requests inapp, with an expand / collapse JSON UI
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'RCaroff' => 'rcaroff@icloud.com' }
   s.source           = { :git => 'https://github.com/RCaroff/RCProxy.git', :tag => s.version.to_s }
-  # s.social_media_url = 'https://twitter.com/<TWITTER_USERNAME>'
 
   s.ios.deployment_target = '15.0'
 
   s.source_files = 'Sources/**/*.swift'
   s.resources = "Sources/RCProxy/Resources/*.xcdatamodeld"
-  # s.resource_bundles = {
-  #   'RCProxy' => ['RCProxy/Assets/*.png']
-  # }
-
-  # s.public_header_files = 'Pod/Classes/**/*.h'
   s.frameworks = 'UIKit', 'SwiftUI'
-  # s.dependency 'AFNetworking', '~> 2.3'
+
 end

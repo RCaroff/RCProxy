@@ -1,5 +1,5 @@
-# ⬆️ RCProxy ⬇️
-A lightweight inapp HTTP requests logger for your iOS and tvOS apps.
+<h1 style="text-align:center;">▶︎ RCProxy</h1>
+<h3 style="text-align:center;">A lightweight inapp HTTP requests logger for your iOS and tvOS apps.</h3><br>
 
 + Simply log requests in your app with 2 lines of code.
 + Magnified JSON view.
@@ -14,7 +14,7 @@ Works on tvOS too!<br>
 
 
 
-## ▶︎ Installation
+## ▼ Installation
 Use SPM:
 
 1. In Xcode, go to File -> Add packages...
@@ -47,11 +47,11 @@ var body: some View {
     }
 }
 ```
-+ Choose the type of storage you want between `.session`, `.userDefaults` and `.database`<br>Be sure to setup this **BEFORE** calling `RCProxy.start()`.<br>Example: 
++ Choose the type of storage you want between `.session`, `.userDefaults()` and `.database()`<br>Be sure to setup this **BEFORE** calling `RCProxy.start()`.<br><br>Example: 
 ```
-RCProxy.storageType = .database
+RCProxy.storageType = .database(maxRequestsCount: 50)
 RCProxy.start()
 ```
-<br>Default value is `.session`.<br><br>`session`: Your requests will be stored in a singleton and will be cleared when app is terminated.<br>`userDefaults`: Your requests will be stored in `UserDefaults.standard` instance, and will persist between sessions but it will allow only a limited amount of data.<br>`.database`: Your requests will be stored in a sqlite file on the phone. It uses CoreData behind the hood.
+<br>Default value is `.session`.<br><br>`session`: Your requests will be stored in a singleton and will be cleared when app is terminated.<br>`userDefaults(maxRequestsCount: //default: 100)`: Your requests will be stored in `UserDefaults.standard` instance, and will persist between sessions but it will allow only a limited amount of data.<br>`.database(maxRequestsCount: //default: 100)`: Your requests will be stored in a sqlite file on the phone. It uses CoreData behind the hood.
 
 Feel free to contribute and / or open issues!
