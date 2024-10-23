@@ -9,7 +9,7 @@
 + JSON file sharing.
 + Copy a single row on long press.
 
-![Simulator Screen Recording - iPhone 14 Pro - 2023-02-14 at 02 54 19](https://user-images.githubusercontent.com/6641303/218618660-74f58036-d0f5-4000-b630-2e08e7a131bd.gif)
+![Simulator Screen Recording - iPhone 15 Pro - 2024-10-23 at 15 10 34](https://github.com/user-attachments/assets/4f473b6c-cc93-4aaa-a50b-9cca4fb34b9f)
 
 Works on tvOS too!<br>
 ![Simulator Screen Recording - Apple TV - 2023-02-14 at 03 00 43](https://user-images.githubusercontent.com/6641303/218619269-8f2c4c67-6de8-45f2-a225-7ea708f8116c.gif)
