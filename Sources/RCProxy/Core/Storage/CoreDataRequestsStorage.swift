@@ -15,7 +15,7 @@ final class CoreDataRequestsStorage: RequestsStorage {
     private let queue = DispatchQueue(label: "RCProxy_core_data_storage", qos: .utility)
 
     private lazy var container: NSPersistentContainer = {
-        guard let modelURL = Bundle.module.url(forResource: "RCProxy",
+        guard let modelURL = Bundle(for: RCProxy.self).url(forResource: "RCProxy",
                                                withExtension: "momd") else {
             fatalError("Failed to find data model")
         }
