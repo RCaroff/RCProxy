@@ -60,4 +60,6 @@ RCProxy.start()
 ```
 <br>Default value is `.session`.<br><br>`session`: Your requests will be stored in a singleton and will be cleared when app is terminated.<br>`userDefaults(maxRequestsCount: //default: 100)`: Your requests will be stored in `UserDefaults.standard` instance, and will persist between sessions but it will allow only a limited amount of data.<br>`.database(maxRequestsCount: //default: 100)`: Your requests will be stored in a sqlite file on the phone. It uses CoreData behind the hood.
 
+⚠️ Only works with URLSession.shared !
+
 Feel free to contribute and / or open issues!
