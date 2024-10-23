@@ -1,5 +1,7 @@
-<h1 style="text-align:center;">▶︎ RCProxy</h1>
-<h3 style="text-align:center;">A lightweight inapp HTTP requests logger for your iOS and tvOS apps.</h3><br>
+<div align="center">
+  <h1>▶︎ RCProxy</h1>
+  <h3>A lightweight inapp HTTP requests logger for your iOS and tvOS apps.</h3>
+</div>
 
 + Simply log requests in your app with 2 lines of code.
 + Magnified JSON view.
@@ -15,6 +17,12 @@ Works on tvOS too!<br>
 
 
 ## ▼ Installation
+Use Cocoapods:
+
+```
+pod 'RCProxy'
+```
+
 Use SPM:
 
 1. In Xcode, go to File -> Add packages...
