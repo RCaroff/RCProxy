@@ -30,8 +30,8 @@ RCProxy will log all your HTTP requests inapp, with an expand / collapse JSON UI
 
   s.ios.deployment_target = '15.0'
 
-  s.source_files = 'Sources/**/*'
-  s.resources = "Resources/*.xcdatamodeld"
+  s.source_files = 'Sources/**/*.swift'
+  s.resources = "Sources/RCProxy/Resources/*.xcdatamodeld"
   # s.resource_bundles = {
   #   'RCProxy' => ['RCProxy/Assets/*.png']
   # }

@@ -15,7 +15,7 @@ final class CoreDataRequestsStorage: RequestsStorage {
     private let queue = DispatchQueue(label: "RCProxy_core_data_storage", qos: .utility)
 
     private lazy var container: NSPersistentContainer = {
-        var modelURL: URL?
+        var modelURL: URL
 
         if let url = Bundle(for: RCProxy.self).url(forResource: "RCProxy",
                                                    withExtension: "momd") {
