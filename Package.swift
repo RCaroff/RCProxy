@@ -25,7 +25,7 @@ let package = Package(
             name: "RCProxy",
             dependencies: [],
             resources: [
-                .process("Resources")
+                .process("../../Resources")
             ]
         ),
         .testTarget(
