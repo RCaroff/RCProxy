@@ -10,8 +10,19 @@ import Foundation
 final class SessionRequestsStorage: RequestsStorage {
     
     private var requestItems: [RequestItem] = []
+    private let maxRequestsCount: UInt
+
+    init(maxRequestsCount: UInt) {
+        self.maxRequestsCount = maxRequestsCount
+    }
 
     func fetch() async -> [RequestItem] {
+        var items = requestItems
+        if items.count > maxRequestsCount {
+            let diff = items.count - Int(maxRequestsCount)
+            items.removeLast(diff)
+            requestItems = items
+        }
         return requestItems
     }
 
