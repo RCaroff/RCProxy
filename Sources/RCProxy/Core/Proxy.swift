@@ -30,8 +30,7 @@ class RCProxyProtocol: URLProtocol {
         URLProtocol.setProperty(true, forKey: "is_handled", in: mutableRequest)
         let newRequest = mutableRequest as URLRequest
 
-        dataTask = URLSession.shared.dataTask(with: newRequest, completionHandler: { [id] data, response, error in
-
+        dataTask = RCProxy.urlSession.dataTask(with: newRequest, completionHandler: { [id] data, response, error in
             if let data = data, let response = response {
                 self.client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
                 self.client?.urlProtocol(self, didLoad: data)
