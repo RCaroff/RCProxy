@@ -53,13 +53,20 @@ var body: some View {
     }
 }
 ```
-+ Choose the type of storage you want between `.session`, `.userDefaults()` and `.database()`<br>Be sure to setup this **BEFORE** calling `RCProxy.start()`.<br><br>Example: 
++ Choose the type of storage you want between `.session()`, `.userDefaults()` and `.database()`<br>Be sure to setup this **BEFORE** calling `RCProxy.start()`.<br><br>Example: 
 ```
 RCProxy.storageType = .database(maxRequestsCount: 50)
 RCProxy.start()
 ```
-<br>Default value is `.session`.<br><br>`session`: Your requests will be stored in a singleton and will be cleared when app is terminated.<br>`userDefaults(maxRequestsCount: //default: 100)`: Your requests will be stored in `UserDefaults.standard` instance, and will persist between sessions but it will allow only a limited amount of data.<br>`.database(maxRequestsCount: //default: 100)`: Your requests will be stored in a sqlite file on the phone. It uses CoreData behind the hood.
+<br>Default value is `.session(maxRequestsCount: 100)`.<br><br>`session(maxRequestsCount: //default: 100)`: Your requests will be stored in a singleton and will be cleared when app is terminated.<br><br>`userDefaults(maxRequestsCount: //default: 100)`: Your requests will be stored in `UserDefaults.standard` instance, and will persist between sessions but it will allow only a limited amount of data.<br><br>`.database(maxRequestsCount: //default: 100)`: Your requests will be stored in a sqlite file on the phone. It uses CoreData behind the hood.
 
-⚠️ Only works with URLSession.shared !
++ RCProxy is listening on `URLSession.shared` instance by default, but you can also inject your own custom.<br>
+To do so, use the static property `urlSession`:
+
+```
+let session = URLSession(configuration: URLSessionConfiguration.default)
+RCProxy.urlSession = session
+```
+
 
 Feel free to contribute and / or open issues!
