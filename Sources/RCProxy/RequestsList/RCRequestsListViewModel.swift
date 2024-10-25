@@ -113,6 +113,5 @@ final class RCRequestsListViewModel: ObservableObject {
                 }
             }
         }
-
     }
 }

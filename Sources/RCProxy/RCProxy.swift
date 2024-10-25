@@ -55,7 +55,6 @@ public final class RCProxy {
     /// The main view that could be displayed inside your swiftUI navigation.
     public static var view: some View {
         RCRequestsListView(viewModel: RCRequestsListViewModel(storage: storage))
-            .preferredColorScheme(.dark)
     }
 
     /// Starts the proxy. Make your storage and session configurations before calling it.

@@ -72,8 +72,6 @@ struct FilterViewTV: View {
                 .frame(width: buttonSize, height: buttonSize, alignment: .center)
             }
             .tint(.green)
-
-
         }
         .buttonStyle(.bordered)
         .padding()
@@ -131,6 +129,7 @@ struct FilterView: View {
 
 struct ListContentView: View {
 
+    @Environment(\.colorScheme) var colorScheme
     @ObservedObject var viewModel: RCRequestsListViewModel
     @State private var showDetails: Bool = false
     @State var showDeleteConfirmation: Bool = false
@@ -204,7 +203,7 @@ struct ListContentView: View {
                 }
             }
         }
-        .tint(.white)
+        .tint(colorScheme == .dark ? .white : .black)
         .toast(message: "URL copied", isShowing: $showCopiedToast, duration: Toast.short)
     }
 
@@ -214,13 +213,14 @@ struct ListContentView: View {
 struct RCRequestsListView: View {
     @ObservedObject var viewModel: RCRequestsListViewModel
     @State var showCopiedToast: Bool = false
+    @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
         if #available(iOS 16.0, tvOS 16.0, *) {
             NavigationStack {
                 ListContentView(viewModel: viewModel)
             }
-            .tint(.white)
+            .tint(colorScheme == .dark ? .white : .black)
 #if os(iOS)
             .navigationBarTitleDisplayMode(.large)
 #endif
@@ -305,5 +305,6 @@ struct StatusCodeBadgeView: View {
             .padding(isTV ? 8 : 4)
             .background(Color(color))
             .cornerRadius(isTV ? 8 : 4)
+            .foregroundColor(.white)
     }
 }

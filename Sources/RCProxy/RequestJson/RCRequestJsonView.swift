@@ -69,6 +69,7 @@ struct RCRequestJsonView: View {
 }
 
 struct JSONCell: View {
+    @Environment(\.colorScheme) var colorScheme
     var padding: CGFloat { isTV ? 32 : 8 }
     var fontSize: CGFloat { isTV ? 16 : 12 }
 
@@ -98,7 +99,7 @@ struct JSONCell: View {
             }
             .padding(.leading, padding*CGFloat(line.indentLevel))
         }
-        .tint(.white)
+        .tint(colorScheme == .dark ? .white : .black)
         #if os(iOS)
         .onTapGesture {
             if line.isExpandable {
