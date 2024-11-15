@@ -28,13 +28,27 @@ public final class RCProxy {
     static var storage: RequestsStorage = SessionRequestsStorage(maxRequestsCount: 100)
 
     /// The URLSession object you want to proxyfy.
-    /// - Default: `URLSession.shared`
-    public static var urlSession: URLSession = URLSession.shared
+    /// - default  `URLSession.shared`
+    static var urlSession: URLSession = URLSession.shared
+
+    /// Use this configuration for your custom URLSession, instead of URLSessionConfiguration.default
+    public static var defaultConfiguration: URLSessionConfiguration {
+        let conf = URLSessionConfiguration.default
+        conf.protocolClasses = [RCProxyProtocol.self]
+        return conf
+    }
+
+    /// Use this configuration for your custom URLSession, instead of URLSessionConfiguration.ephemeral
+    public static var ephemeralConfiguration: URLSessionConfiguration {
+        let conf = URLSessionConfiguration.ephemeral
+        conf.protocolClasses = [RCProxyProtocol.self]
+        return conf
+    }
 
 
     /// The type of storage you want to use.
     /// - Default: `.session()`
-    public static var storageType: StorageType = .session() {
+    static var storageType: StorageType = .session() {
         didSet {
             switch storageType {
             case .session(let count):
@@ -57,8 +71,12 @@ public final class RCProxy {
         RCRequestsListView(viewModel: RCRequestsListViewModel(storage: storage))
     }
 
-    /// Starts the proxy. Make your storage and session configurations before calling it.
-    public static func start() {
+    /// Starts the proxy with the given storage type.
+    /// - parameter urlSession: The URLSession object you want to proxyfy. Default: `URLSession.shared`
+    /// - parameter storageType: The type of storage. Default value: ` .session(maxRequestsCount: UInt = 100)`
+    public static func start(with urlSession: URLSession = URLSession.shared, storageType: StorageType = .session()) {
+        RCProxy.storageType = storageType
+        RCProxy.urlSession = urlSession
         URLProtocol.registerClass(RCProxyProtocol.self)
     }
 
