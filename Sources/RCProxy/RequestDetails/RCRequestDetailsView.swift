@@ -23,6 +23,32 @@ struct RCRequestDetailsView: View {
 #endif
             })
             Section {
+                ForEach(item.queryParameters) { item in
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(item.name)
+                            .font(.footnote)
+                            .foregroundColor(Color(uiColor: .lightGray))
+
+                        Text(item.value)
+                            .font(.system(size: isTV ? 24 : 14, weight: .regular))
+
+                    }
+#if os(iOS)
+                    .onLongPressGesture {
+                        UIImpactFeedbackGenerator(style: .rigid)
+                            .impactOccurred()
+                        UIPasteboard.general.string = item.value
+                        showCopiedToast = true
+                    }
+#endif
+                }
+            } header: {
+                Text("▲ Request")
+                    .font(.system(size: isTV ? 32 : 20, weight: .bold))
+                    .padding()
+            }
+
+            Section {
                 NavigationLink {
                     RCRequestJsonView(viewModel: RCRequestJsonViewModel(
                         json: item.requestHeaders,
@@ -43,10 +69,6 @@ struct RCRequestDetailsView: View {
                     Text("Body")
                         .font(.system(size: isTV ? 24 : 16, weight: .regular))
                 }
-            } header: {
-                Text("▲ Request")
-                    .font(.system(size: isTV ? 32 : 20, weight: .bold))
-                    .padding()
             }
 
             Section {
@@ -92,7 +114,7 @@ struct RCRequestDetailsView: View {
         .sheet(isPresented: $isSharing, content: {
             ShareSheetView(activityItems: [item.cURL], callback: nil)
         })
-        .toast(message: "URL copied", isShowing: $showCopiedToast, duration: Toast.short)
+        .toast(message: "Copied", isShowing: $showCopiedToast, duration: Toast.short)
 #endif
 
     }

@@ -8,10 +8,18 @@
 import Foundation
 import UIKit
 
+struct QueryParameterItem: Codable, Identifiable {
+    var id: String
+    var name: String
+    var value: String
+}
+
 class RequestItem: Codable, Identifiable {
     var id: String
     var date: Date
+    var fullURL: String
     var url: String
+    var queryParameters: [QueryParameterItem] = []
     var method: String
     var requestHeaders: [String: String]
     var responseHeaders: [String: String] = [:]
@@ -59,22 +67,42 @@ class RequestItem: Codable, Identifiable {
     }
 
     init(with coreDataModel: RequestItemCD) {
-        self.id = coreDataModel.id
-        self.date = coreDataModel.date
-        self.url = coreDataModel.url
-        self.method = coreDataModel.method
-        self.requestHeaders = (coreDataModel.requestHeaders?.toJSONObject() as? [String: String]) ?? ["No":"Content"]
-        self.responseHeaders = (coreDataModel.responseHeaders?.toJSONObject() as? [String: String]) ?? ["No":"Content"]
-        self.statusCode = Int(coreDataModel.statusCode)
-        self.cURL = coreDataModel.cURL
-        self.requestBodyData = coreDataModel.requestBodyData
-        self.responseBodyData = coreDataModel.responseBodyData
+        id = coreDataModel.id
+        date = coreDataModel.date
+        fullURL = coreDataModel.url
+        url = fullURL
+        if let urlComps = URLComponents(string: coreDataModel.url) {
+            url = "\(urlComps.scheme ?? "")://\(urlComps.host ?? "")\(urlComps.path)"
+        }
+
+        if let parsedURL = URLComponents(string: coreDataModel.url) {
+            self.queryParameters = parsedURL.queryItems?.compactMap {
+                QueryParameterItem(id: "\($0.name)\($0.value ?? "")", name: $0.name, value: $0.value ?? "")
+            } ?? []
+        }
+        method = coreDataModel.method
+        requestHeaders = (coreDataModel.requestHeaders?.toJSONObject() as? [String: String]) ?? ["No":"Content"]
+        responseHeaders = (coreDataModel.responseHeaders?.toJSONObject() as? [String: String]) ?? ["No":"Content"]
+        statusCode = Int(coreDataModel.statusCode)
+        cURL = coreDataModel.cURL
+        requestBodyData = coreDataModel.requestBodyData
+        responseBodyData = coreDataModel.responseBodyData
     }
 
     init(with requestData: RequestData) {
         id =  requestData.id
         cURL = requestData.urlRequest.cURL()
-        url = requestData.urlRequest.url?.absoluteString ?? "No URL"
+        fullURL = requestData.urlRequest.url?.absoluteString ?? "No URL"
+        url = fullURL
+        if let urlComps = URLComponents(string: fullURL) {
+            url = "\(urlComps.scheme ?? "")://\(urlComps.host ?? "")\(urlComps.path)"
+        }
+
+        if let parsedURL = URLComponents(string: fullURL) {
+            queryParameters = parsedURL.queryItems?.compactMap {
+                QueryParameterItem(id: "\($0.name)\($0.value ?? "")", name: $0.name, value: $0.value ?? "")
+            } ?? []
+        }
         method = (requestData.urlRequest.httpMethod ?? "").uppercased()
         requestBodyData = requestData.urlRequest.bodyStream()
         requestHeaders = requestData.urlRequest.allHTTPHeaderFields ?? ["No":"Content"]

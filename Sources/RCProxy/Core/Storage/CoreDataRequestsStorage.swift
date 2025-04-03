@@ -55,7 +55,7 @@ final class CoreDataRequestsStorage: RequestsStorage {
             let item = RequestItem(with: request)
             cdItem.id = item.id
             cdItem.date = item.date
-            cdItem.url = item.url
+            cdItem.url = item.fullURL
             cdItem.method = item.method
             cdItem.requestHeaders = (item.requestHeaders as [String: Any]).toData()
             cdItem.requestBodyData = item.requestBodyData
