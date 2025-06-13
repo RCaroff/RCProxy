@@ -301,6 +301,14 @@ open class JSON {
             return arrayElements
         } else if let objectElements = try json.objectParser(string, index: &index) {
             return objectElements
+        } else {
+            let manifestDict = ["manifest": string]
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = .prettyPrinted
+            guard let jsonData = try? JSONSerialization.data(withJSONObject: manifestDict, options: .prettyPrinted),
+            let stringManifest = String(data: jsonData, encoding: .utf8),
+            let parsedManifest = try json.objectParser(stringManifest, index: &index) else { throw SerializationError.invalidJSON }
+            return parsedManifest
         }
 
         throw SerializationError.invalidJSON
