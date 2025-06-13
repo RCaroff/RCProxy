@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>▶︎ RCProxy</h1>
+  <h1>▶︎{ RCProxy</h1>
   <h3>A lightweight inapp HTTP requests logger for your iOS and tvOS apps.</h3>
 </div>
 
