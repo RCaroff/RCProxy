@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Rémi Caroff on 13/11/2022.
 //
@@ -13,7 +13,7 @@ extension Optional where Wrapped == Data {
         case .none:
             return "No content"
         case .some(let data):
-            return data.toJSON()
+            return data.toJSON() ?? String(data: data, encoding: .utf8) ?? "No content"
         }
     }
 
@@ -28,11 +28,12 @@ extension Optional where Wrapped == Data {
 }
 
 extension Data {
-    func toJSON() -> String {
+    func toJSON() -> String? {
         do {
-            return try JSON.parse(data: self).toJSONString(prettyPrinted: true)
+            let value = try JSON.parse(data: self).toJSONString(prettyPrinted: true)
+            return value
         } catch {
-            return "No content"
+            return nil
         }
     }
 

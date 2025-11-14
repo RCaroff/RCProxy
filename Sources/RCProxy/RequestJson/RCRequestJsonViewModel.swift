@@ -1,6 +1,6 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Rémi Caroff on 06/11/2022.
 //
@@ -55,7 +55,7 @@ class JSONLine: ObservableObject, Identifiable, Equatable {
 class RCRequestJsonViewModel: ObservableObject {
 
     @Published var lines: [JSONLine] = []
-    var prettyJson: String = "No Content"
+    @Published var prettyJson: String = "No Content"
     var jsonTitle: String
 
     private var jsonBlock: JSONBlock = JSONBlock(id: UUID().uuidString)
@@ -64,7 +64,7 @@ class RCRequestJsonViewModel: ObservableObject {
     init(json: [String: Any], prettyJson: String? = nil, jsonTitle: String) {
         self.jsonTitle = jsonTitle
         if json.isEmpty {
-            lines = [JSONLine(id: UUID(), blockId: "", value: "No content", indentLevel: 0, isExpandable: false)]
+            lines = [JSONLine(id: UUID(), blockId: "", value: prettyJson ?? "No content", indentLevel: 0, isExpandable: false)]
         } else {
             jsonBlock = buildBlock(with: ["{ ... }": json], parentBlockId: nil, indentLevel: -1)
             formatLines()

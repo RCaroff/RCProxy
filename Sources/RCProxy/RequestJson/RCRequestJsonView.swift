@@ -8,42 +8,56 @@
 import Foundation
 import SwiftUI
 
+enum ViewType: Int, CaseIterable {
+    case json
+    case text
+}
+
 struct RCRequestJsonView: View {
     @ObservedObject var viewModel: RCRequestJsonViewModel
     @State var showCopiedToast: Bool = false
     @State var isSharing: Bool = false
-
+    
+    @State var selectedView: ViewType = .json
+    
     var minimumRowHeight: CGFloat { isTV ? 1.0 : 48.0 }
-
+    
     init(viewModel: RCRequestJsonViewModel) {
         self.viewModel = viewModel
     }
-
+    
     var body: some View {
-        List {
-            ForEach($viewModel.lines) { $line in
-                JSONCell(line: $line) { [line] isExpanded in
-                    #if os(iOS)
-                    UIImpactFeedbackGenerator(style: .medium)
-                        .impactOccurred()
-                    #endif
-                    if isExpanded {
-                        viewModel.expand(blockId: line.blockId)
-                    } else {
-                        viewModel.collapse(blockId: line.blockId)
+        ZStack {
+            if selectedView == .json {
+                List {
+                    ForEach($viewModel.lines) { $line in
+                        JSONCell(line: $line) { [line] isExpanded in
+#if os(iOS)
+                            UIImpactFeedbackGenerator(style: .medium)
+                                .impactOccurred()
+#endif
+                            if isExpanded {
+                                viewModel.expand(blockId: line.blockId)
+                            } else {
+                                viewModel.collapse(blockId: line.blockId)
+                            }
+                        } longPressAction: {
+#if os(iOS)
+                            UIPasteboard.general.string = line.value
+                            showCopiedToast = true
+#endif
+                        }
                     }
-                } longPressAction: {
-                    #if os(iOS)
-                    UIPasteboard.general.string = line.value
-                    showCopiedToast = true
-                    #endif
+                    .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 0))
                 }
+                .animation(.easeOut(duration: 0.3), value: viewModel.lines.count)
+                .environment(\.defaultMinListRowHeight, minimumRowHeight)
+                .toast(message: "Copied!", isShowing: $showCopiedToast, duration: Toast.short)
+            } else {
+                TextEditor(text: $viewModel.prettyJson)
+                    .padding(.horizontal)
             }
-            .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 0))
         }
-        .animation(.easeOut(duration: 0.3), value: viewModel.lines.count)
-        .environment(\.defaultMinListRowHeight, minimumRowHeight)
-        .toast(message: "Copied!", isShowing: $showCopiedToast, duration: Toast.short)
 #if os(iOS)
         .toolbar {
             Button(action: {
@@ -54,6 +68,13 @@ struct RCRequestJsonView: View {
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 24, height: 24)
             })
+        }
+        .toolbar {
+            Picker("", selection: $selectedView, content: {
+                Text("JSON").tag(ViewType.json)
+                Text("Text").tag(ViewType.text)
+            })
+            .pickerStyle(.segmented)
         }
         .sheet(isPresented: $isSharing, content: {
             if let url = viewModel.prettyJson.toJSONFile(withName: viewModel.jsonTitle) {
@@ -72,11 +93,11 @@ struct JSONCell: View {
     @Environment(\.colorScheme) var colorScheme
     var padding: CGFloat { isTV ? 32 : 8 }
     var fontSize: CGFloat { isTV ? 16 : 12 }
-
+    
     @Binding var line: JSONLine
     var tapAction: (Bool) -> Void
     var longPressAction: () -> Void
-
+    
     var body: some View {
         Button {
             if line.isExpandable {
@@ -91,16 +112,16 @@ struct JSONCell: View {
                 } else {
                     Text("•")
                 }
-
+                
                 Text(line.value)
                     .font(.system(size: fontSize))
                     .padding(.init(top: 8, leading: 0, bottom: 8, trailing: 0))
-
+                
             }
             .padding(.leading, padding*CGFloat(line.indentLevel))
         }
         .tint(colorScheme == .dark ? .white : .black)
-        #if os(iOS)
+#if os(iOS)
         .onTapGesture {
             if line.isExpandable {
                 tapAction(!line.isExpanded)
@@ -111,6 +132,6 @@ struct JSONCell: View {
                 .impactOccurred()
             longPressAction()
         }
-        #endif
+#endif
     }
 }
