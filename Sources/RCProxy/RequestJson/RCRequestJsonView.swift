@@ -28,24 +28,21 @@ struct RCRequestJsonView: View {
     
     var body: some View {
         ZStack {
+#if os(iOS)
             if selectedView == .json {
                 List {
                     ForEach($viewModel.lines) { $line in
                         JSONCell(line: $line) { [line] isExpanded in
-#if os(iOS)
                             UIImpactFeedbackGenerator(style: .medium)
                                 .impactOccurred()
-#endif
                             if isExpanded {
                                 viewModel.expand(blockId: line.blockId)
                             } else {
                                 viewModel.collapse(blockId: line.blockId)
                             }
                         } longPressAction: {
-#if os(iOS)
                             UIPasteboard.general.string = line.value
                             showCopiedToast = true
-#endif
                         }
                     }
                     .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 0))
@@ -57,6 +54,22 @@ struct RCRequestJsonView: View {
                 TextEditor(text: $viewModel.prettyJson)
                     .padding(.horizontal)
             }
+#else
+            List {
+                ForEach($viewModel.lines) { $line in
+                    JSONCell(line: $line) { [line] isExpanded in
+                        if isExpanded {
+                            viewModel.expand(blockId: line.blockId)
+                        } else {
+                            viewModel.collapse(blockId: line.blockId)
+                        }
+                    } longPressAction: {}
+                }
+                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 0))
+            }
+            .animation(.easeOut(duration: 0.3), value: viewModel.lines.count)
+            .environment(\.defaultMinListRowHeight, minimumRowHeight)
+#endif
         }
 #if os(iOS)
         .toolbar {
