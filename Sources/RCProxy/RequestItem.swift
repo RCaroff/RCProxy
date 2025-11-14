@@ -1,6 +1,6 @@
 //
 //  RequestItem.swift
-//  
+//
 //
 //  Created by Rémi Caroff on 03/02/2023.
 //
@@ -29,11 +29,17 @@ class RequestItem: Codable, Identifiable {
     var responseBodyData: Data?
 
     var requestBody: String {
-        requestBodyData?.toJSON() ?? "No Content"
+        guard let requestBodyData else {
+            return "No content"
+        }
+        return requestBodyData.toJSON() ?? String(data: requestBodyData, encoding: .utf8) ?? "No content"
     }
 
     var responseBody: String {
-        responseBodyData?.toJSON() ?? "No content"
+        guard let responseBodyData else {
+            return "No content"
+        }
+        return responseBodyData.toJSON() ?? String(data: responseBodyData, encoding: .utf8) ?? "No content"
     }
 
     var requestBodyJson: [String: Any] {
