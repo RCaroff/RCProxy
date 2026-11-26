@@ -52,6 +52,7 @@ class JSONLine: ObservableObject, Identifiable, Equatable {
     }
 }
 
+@MainActor
 class RCRequestJsonViewModel: ObservableObject {
 
     @Published var lines: [JSONLine] = []

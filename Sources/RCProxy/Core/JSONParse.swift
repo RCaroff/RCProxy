@@ -311,6 +311,16 @@ open class JSON {
         return try parse(string: stringData)
     }
 
+    /// Current nesting level of the document being parsed.
+    private var depth = 0
+    /// The parser is recursive: documents nested deeper than this are refused rather than risking a stack overflow.
+    private static let maxDepth = 512
+
+    private func enterNestedStructure() throws {
+        guard depth < JSON.maxDepth else { throw SerializationError.invalidJSON }
+        depth += 1
+    }
+
     /**
      Function to parse object
 
@@ -327,6 +337,9 @@ open class JSON {
      */
     private func objectParser(_ jsonString: String, index: inout String.Index) throws -> [ObjectElement]? {
         guard index != jsonString.endIndex, jsonString[index] == "{" else { return nil }
+
+        try enterNestedStructure()
+        defer { depth -= 1 }
 
         var parsedDict = [ObjectElement]()
         index = jsonString.index(after: index)
@@ -431,7 +444,7 @@ open class JSON {
      */
     @discardableResult
     private func endOfSetParser(_ jsonString:String, index: inout String.Index) -> Bool? {
-        guard jsonString[index] == "}" else { return nil }
+        guard index != jsonString.endIndex, jsonString[index] == "}" else { return nil }
 
         index = jsonString.index(after: index)
 
@@ -453,6 +466,9 @@ open class JSON {
      */
     private func arrayParser(_ jsonString: String, index: inout String.Index) throws -> [ArrayElement]? {
         guard index != jsonString.endIndex, jsonString[index] == "[" else { return nil }
+
+        try enterNestedStructure()
+        defer { depth -= 1 }
 
         var parsedArray = [ArrayElement]()
         index = jsonString.index(after: index)
@@ -538,7 +554,7 @@ open class JSON {
      - returns: boolean
      */
     private func isSpace(_ character: Character) -> Bool {
-        return [" ", "\t", "\n"].contains(character)
+        return [" ", "\t", "\n", "\r", "\r\n"].contains(character)
     }
 
     /**
@@ -583,9 +599,7 @@ open class JSON {
      - returns: spaces captured or nil if there was no spaces
      */
     private func consumeNumber(_ jsonString: String, index: inout String.Index) {
-        while isDigit(jsonString[index]) {
-            guard jsonString.index(after: index) != jsonString.endIndex else { break }
-
+        while index != jsonString.endIndex, isDigit(jsonString[index]) {
             index = jsonString.index(after: index)
         }
     }
@@ -602,25 +616,27 @@ open class JSON {
      */
     private func numberParser(_ jsonString: String, index: inout String.Index) throws -> Value? {
         let startingIndex = index
+        let endIndex = jsonString.endIndex
+
+        guard index != endIndex else { return nil }
 
         // When number is negative i.e. starts with "-"
         if jsonString[startingIndex] == "-" {
-            guard jsonString.index(after: index) != jsonString.endIndex else { return nil }
-
             index = jsonString.index(after: index)
         }
 
-        guard isDigit(jsonString[index]) else { return nil }
+        guard index != endIndex, isDigit(jsonString[index]) else {
+            index = startingIndex
+            return nil
+        }
 
         consumeNumber(jsonString,index: &index)
 
         // For decimal points
-        if jsonString[index] == "." {
-            guard jsonString.index(after: index) != jsonString.endIndex else { return nil }
-
+        if index != endIndex, jsonString[index] == "." {
             index = jsonString.index(after: index)
 
-            guard isDigit(jsonString[index]) else {
+            guard index != endIndex, isDigit(jsonString[index]) else {
                 throw SerializationError.invalidNumberMissingFractionalElement
             }
 
@@ -628,16 +644,14 @@ open class JSON {
         }
 
         // For exponents
-        if String(jsonString[index]).lowercased() == "e" {
-            guard jsonString.index(after: index) != jsonString.endIndex else { return nil }
-
+        if index != endIndex, jsonString[index] == "e" || jsonString[index] == "E" {
             index = jsonString.index(after: index)
 
-            if jsonString[index] == "-" || jsonString[index] == "+" {
+            if index != endIndex, jsonString[index] == "-" || jsonString[index] == "+" {
                 index = jsonString.index(after: index)
             }
 
-            guard isDigit(jsonString[index]) else {
+            guard index != endIndex, isDigit(jsonString[index]) else {
                 throw SerializationError.invalidNumberMissingExponent
             }
 
@@ -646,7 +660,12 @@ open class JSON {
 
         guard let double = Double(jsonString[startingIndex ..< index]) else { return nil }
 
-        return (double.truncatingRemainder(dividingBy: 1.0) == 0.0 && double <= Double(Int.max)) ? Int(double) : double
+        // `Int(exactly:)` rather than `Int(_:)`, which traps on values that do not fit in an Int.
+        if let int = Int(exactly: double) {
+            return int
+        }
+
+        return double
     }
 
     /**
@@ -665,12 +684,11 @@ open class JSON {
 
         while index != jsonString.endIndex {
             if jsonString[index] == "\\" {
+                // Skip the backslash and the character it escapes.
                 index = jsonString.index(after: index)
 
-                if jsonString[index] == "\"" {
+                if index != jsonString.endIndex {
                     index = jsonString.index(after: index)
-                } else {
-                    continue
                 }
             } else if jsonString[index] == "\"" {
                 break
