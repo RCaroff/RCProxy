@@ -9,8 +9,8 @@ import Foundation
 import SwiftUI
 
 struct Toast: ViewModifier {
-    static let short: TimeInterval = 2
-    static let long: TimeInterval = 3.5
+    nonisolated static let short: TimeInterval = 2
+    nonisolated static let long: TimeInterval = 3.5
 
     let message: String
     @Binding var isShowing: Bool

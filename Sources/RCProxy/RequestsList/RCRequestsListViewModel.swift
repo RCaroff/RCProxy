@@ -6,7 +6,9 @@
 //
 import Foundation
 import SwiftUI
+import RCProxyCore
 
+@MainActor
 final class RCRequestsListViewModel: ObservableObject {
 
     @Published var items: [RequestItem] = []
@@ -29,16 +31,16 @@ final class RCRequestsListViewModel: ObservableObject {
     private var allItems: [RequestItem] = []
     private var filteredItems: [RequestItem] = []
 
-    private var storage: RequestsStorage
+    private let storage: any RequestsStorage
 
-    init(storage: RequestsStorage) {
+    init(storage: any RequestsStorage) {
         self.storage = storage
         fetch()
     }
 
     func fetch() {
 
-        Task { @MainActor in
+        Task {
             allItems = await storage.fetch()
 
             if isErrorFiltered {
@@ -56,7 +58,9 @@ final class RCRequestsListViewModel: ObservableObject {
     }
 
     func clear() {
-        storage.clear()
+        Task { [storage] in
+            await storage.clear()
+        }
         items = []
         allItems = []
         filteredItems = []

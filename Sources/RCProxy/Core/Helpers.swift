@@ -100,25 +100,27 @@ extension [String: String] {
 
 extension URLRequest {
     public func cURL(pretty: Bool = false) -> String {
+        cURL(pretty: pretty, body: httpBody ?? bodyStream())
+    }
+
+    /// Builds the cURL command with an already read body, so that the body stream is only consumed once.
+    func cURL(pretty: Bool = false, body: Data?) -> String {
         let newLine = pretty ? "\\\n" : ""
         let method = (pretty ? "--request " : "-X ") + "\(self.httpMethod ?? "GET") \(newLine)"
-        let url: String = (pretty ? "--url " : "") + "\'\(self.url?.absoluteString ?? "")\' \(newLine)"
+        let url: String = (pretty ? "--url " : "") + "\(Self.shellQuoted(self.url?.absoluteString ?? "")) \(newLine)"
 
         var cURL = "curl "
         var header = ""
         var data: String = ""
 
         if let httpHeaders = self.allHTTPHeaderFields, httpHeaders.keys.count > 0 {
-            for (key,value) in httpHeaders {
-                header += (pretty ? "--header " : "-H ") + "\'\(key): \(value)\' \(newLine)"
+            for (key, value) in httpHeaders.sorted(by: { $0.key < $1.key }) {
+                header += (pretty ? "--header " : "-H ") + "\(Self.shellQuoted("\(key): \(value)")) \(newLine)"
             }
         }
 
-        if let body = self.bodyStreamAsJSON() as? [String: Any],
-           let bodyData = body.toData(),
-           let bodyString = String(data: bodyData, encoding: .utf8),
-           !bodyString.isEmpty {
-            data = "--data '\(bodyString)'"
+        if let body, !body.isEmpty, let bodyString = String(data: body, encoding: .utf8) {
+            data = "--data \(Self.shellQuoted(bodyString))"
         }
 
         cURL += method + url + header + data
@@ -126,39 +128,31 @@ extension URLRequest {
         return cURL
     }
 
+    /// Wraps a value in single quotes, escaping the single quotes it contains.
+    private static func shellQuoted(_ value: String) -> String {
+        "'" + value.replacingOccurrences(of: "'", with: "'\\''") + "'"
+    }
+
+    /// Reads the body stream of the request. A stream can only be read once.
     func bodyStream() -> Data? {
         guard let bodyStream = self.httpBodyStream else { return nil }
 
         bodyStream.open()
+        defer { bodyStream.close() }
 
-        // Will read 16 chars per iteration. Can use bigger buffer if needed
-        let bufferSize: Int = 16
-
+        let bufferSize = 16 * 1024
         let buffer = UnsafeMutablePointer<UInt8>.allocate(capacity: bufferSize)
+        defer { buffer.deallocate() }
 
-        var dat = Data()
+        var data = Data()
 
         while bodyStream.hasBytesAvailable {
-
-            let readDat = bodyStream.read(buffer, maxLength: bufferSize)
-            dat.append(buffer, count: readDat)
+            let readCount = bodyStream.read(buffer, maxLength: bufferSize)
+            // 0 means the end of the stream, a negative value means an error.
+            guard readCount > 0 else { break }
+            data.append(buffer, count: readCount)
         }
 
-        buffer.deallocate()
-
-        bodyStream.close()
-
-        return dat
-    }
-
-    func bodyStreamAsJSON() -> Any? {
-        guard let dat = bodyStream() else { return nil }
-
-        do {
-            return try JSON.parse(data: dat).toJSONObject()
-        } catch {
-            print(error.localizedDescription)
-            return nil
-        }
+        return data
     }
 }

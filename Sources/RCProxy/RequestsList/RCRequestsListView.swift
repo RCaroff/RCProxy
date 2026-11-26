@@ -5,10 +5,13 @@
 //  Created by Rémi Caroff on 27/08/2022.
 //
 import SwiftUI
+import RCProxyCore
 
-var isTV: Bool {
-    UIDevice.current.userInterfaceIdiom == .tv
-}
+#if os(tvOS)
+let isTV = true
+#else
+let isTV = false
+#endif
 
 struct RequestsEmptyView: View {
     @Environment(\.dismiss) var dismiss
@@ -139,6 +142,19 @@ struct ListContentView: View {
     var body: some View {
         List {
             Section {
+                // A regular row of the list, under the filters.
+                DesktopStreamingSwitch()
+                if viewModel.items.isEmpty {
+                    // A row rather than an overlay centred on the list: it can never cover the header,
+                    // however tall the header is and however small the screen (tvOS sheets).
+                    RequestsEmptyView()
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, isTV ? 24 : 80)
+                        .listRowBackground(Color.clear)
+#if os(iOS)
+                        .listRowSeparator(.hidden)
+#endif
+                }
                 ForEach(viewModel.items) { item in
                     ZStack {
                         RCRequestItemCell(item: item, navigationEnabled: true, onLongPress: {
@@ -151,20 +167,22 @@ struct ListContentView: View {
 
                 }
             } header: {
-                HStack {
-                    Spacer()
+                VStack(spacing: 8) {
+                    HStack {
+                        Spacer()
 #if os(iOS)
-                    FilterView(
-                        isErrorFiltered: $viewModel.isErrorFiltered,
-                        isSuccessFiltered: $viewModel.isSuccessFiltered
-                    )
+                        FilterView(
+                            isErrorFiltered: $viewModel.isErrorFiltered,
+                            isSuccessFiltered: $viewModel.isSuccessFiltered
+                        )
 #else
-                    FilterViewTV(
-                        isErrorFiltered: $viewModel.isErrorFiltered,
-                        isSuccessFiltered: $viewModel.isSuccessFiltered
-                    )
+                        FilterViewTV(
+                            isErrorFiltered: $viewModel.isErrorFiltered,
+                            isSuccessFiltered: $viewModel.isSuccessFiltered
+                        )
 #endif
-                    Spacer()
+                        Spacer()
+                    }
                 }
             }
         }
@@ -174,11 +192,6 @@ struct ListContentView: View {
         .textInputAutocapitalization(.never)
         .autocorrectionDisabled()
 #endif
-        .overlay {
-            if viewModel.items.isEmpty {
-                RequestsEmptyView()
-            }
-        }
         .navigationTitle("▶︎ Requests")
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
