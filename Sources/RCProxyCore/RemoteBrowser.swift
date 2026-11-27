@@ -48,6 +48,11 @@ public final class RemoteBrowser: NSObject, @unchecked Sendable {
         case deviceInfo(RemoteDeviceInfo, deviceID: String)
         /// A new request, or the new state of a known request (same `id`).
         case request(RequestItem, deviceID: String)
+        /// The device asks this viewer to perform a request: answer with `respond(_:toDeviceWithID:)`.
+        /// Only received after `setExecutesRequests(true)`.
+        case execute(RemoteExecutionRequest, deviceID: String)
+        /// The device does not wait for the result of this request anymore.
+        case cancelExecution(id: String, deviceID: String)
         case browsingFailed(String)
     }
 
@@ -55,6 +60,7 @@ public final class RemoteBrowser: NSObject, @unchecked Sendable {
         let session: MCSession
         let peer: MCPeerID
         let deviceID: String
+        var isConnected = false
         var assembler = RemoteFrameAssembler()
 
         init(session: MCSession, peer: MCPeerID, deviceID: String) {
@@ -78,6 +84,7 @@ public final class RemoteBrowser: NSObject, @unchecked Sendable {
     private var peers: [String: MCPeerID] = [:]
     private var deviceIDs: [MCPeerID: String] = [:]
     private var links: [ObjectIdentifier: Link] = [:]
+    private var executesRequests = false
 
     /// - Parameters:
     ///   - viewerID: A stable identifier of this viewer. Devices use it to remember trusted viewers.
@@ -153,6 +160,40 @@ public final class RemoteBrowser: NSObject, @unchecked Sendable {
         }
     }
 
+    // MARK: Delegated requests
+
+    /// Asks the connected devices, and those that will connect, to stop talking to the network and to hand
+    /// their requests over to this viewer instead (`Event.execute`). Off by default.
+    public func setExecutesRequests(_ enabled: Bool) {
+        queue.async { [self] in
+            guard executesRequests != enabled else { return }
+            executesRequests = enabled
+            for link in links.values where link.isConnected {
+                send(.delegation(enabled), over: link)
+            }
+        }
+    }
+
+    /// Answers an `Event.execute`.
+    public func respond(_ result: RemoteExecutionResult, toDeviceWithID deviceID: String) {
+        queue.async { [self] in
+            guard let link = links.values.first(where: { $0.deviceID == deviceID && $0.isConnected }) else { return }
+            send(.executionResult(result), over: link)
+        }
+    }
+
+    private func send(_ message: RemoteMessage, over link: Link) {
+        guard let frames = try? RemoteFrameCodec.encode(message) else { return }
+        for frame in frames {
+            do {
+                try link.session.send(frame, toPeers: [link.peer], with: .reliable)
+            } catch {
+                // The device went away: the session delegate will clean the link up.
+                return
+            }
+        }
+    }
+
     @discardableResult
     private func removeLinks(toDeviceWithID deviceID: String) -> Bool {
         var removed = false
@@ -219,7 +260,12 @@ extension RemoteBrowser: MCSessionDelegate {
             guard let link = links[key] else { return }
             switch state {
             case .connected:
+                guard !link.isConnected else { return }
+                link.isConnected = true
                 continuation.yield(.connected(deviceID: link.deviceID))
+                if executesRequests {
+                    send(.delegation(true), over: link)
+                }
             case .notConnected:
                 link.session.delegate = nil
                 links[key] = nil
@@ -241,6 +287,13 @@ extension RemoteBrowser: MCSessionDelegate {
                 continuation.yield(.deviceInfo(info, deviceID: link.deviceID))
             case .upsert(let item):
                 continuation.yield(.request(item, deviceID: link.deviceID))
+            case .execute(let request):
+                continuation.yield(.execute(request, deviceID: link.deviceID))
+            case .cancelExecution(let id):
+                continuation.yield(.cancelExecution(id: id, deviceID: link.deviceID))
+            case .delegation, .executionResult:
+                // Viewer → device messages: nothing to do with them here.
+                break
             }
         }
     }

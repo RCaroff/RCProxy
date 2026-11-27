@@ -89,12 +89,26 @@ public struct RemoteViewerInfo: Codable, Sendable, Hashable, Identifiable {
     }
 }
 
-/// Messages sent by a device to a viewer.
+/// Messages exchanged by a device and a viewer.
+///
+/// A peer that does not know a case (an older version) fails to decode the message and ignores it.
 enum RemoteMessage: Codable, Sendable {
+    // Device → viewer.
+
     /// First message of a connection: who is talking.
     case hello(RemoteDeviceInfo)
     /// A new request, or a new state of an already known request (matched by `id`).
     case upsert(RequestItem)
+    /// Asks the viewer to perform a request and to answer with `.executionResult`.
+    case execute(RemoteExecutionRequest)
+    /// The app is not interested in the result of this request anymore.
+    case cancelExecution(id: String)
+
+    // Viewer → device.
+
+    /// Tells whether the viewer wants to perform the requests of the app. Off until told otherwise.
+    case delegation(Bool)
+    case executionResult(RemoteExecutionResult)
 }
 
 extension String {

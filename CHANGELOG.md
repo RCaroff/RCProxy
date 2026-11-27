@@ -1,5 +1,17 @@
 # Changelog
 
+## 4.1.0
+
+### Added
++ **Requests run by RCProxy Desktop**: when the Mac asks for it, the app hands every intercepted request over to RCProxy Desktop, which performs it and sends the response back. This is what lets RCProxy Desktop mock requests and responses, with nothing to configure in the app. The status under the toggle tells when the Mac runs the requests.
++ The app takes its requests back by itself: when no Mac asked for them, when the Mac disconnects (pending requests included), or when it stops answering.
++ The first requests of the app are run by the Mac too: when a Mac ran the requests the last time, the requests made at launch (or when the app comes back to the foreground) wait for it to reconnect, which usually takes a second or two. If the Mac does not show up within 5 seconds, the app performs them itself, and stops waiting at the next launches until a Mac runs its requests again.
++ Cookies, `User-Agent` and `Accept-Language` are sent as the app would have sent them, and the cookies set by the responses are stored in the app.
+
+### Notes
++ Viewers that only watch (RCProxy Desktop 1.0, the RCProxy tab of other tools) keep working as before: the app performs its requests itself.
++ A request performed by the Mac leaves from the Mac: its network (VPN, proxy, IP address) applies, not the one of the device.
+
 ## 4.0.0
 
 ### Added
