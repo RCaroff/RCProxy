@@ -29,7 +29,7 @@ RCProxy is distributed with Swift Package Manager:
 Or in a `Package.swift`:
 
 ```
-.package(url: "https://github.com/RCaroff/RCProxy.git", from: "4.0.0")
+.package(url: "https://github.com/RCaroff/RCProxy.git", from: "4.1.0")
 ```
 
 ## ▼ How to use it
@@ -97,6 +97,7 @@ The requests already recorded are sent on connection, then every new request is 
 + The toggle is remembered: once on, streaming resumes by itself at the next launches, as soon as RCProxy records a request. The requests made at launch show up on the Mac too.
 + Requests may hold tokens and personal data: each Mac has to be allowed once on the device.
 + Under the toggle, RCProxy tells whether a Mac is receiving the requests, or what is missing.
++ **Mocks.** By default, a connected RCProxy Desktop also *runs* the requests: the app hands each request over to the Mac, which performs it (or answers it with a mock) and sends the response back. Nothing to set up in the app, and the app takes its requests back as soon as the Mac goes away. The requests made at launch are mocked too: when a Mac ran the requests the last time, they wait for it to reconnect (a second or two; after 5 seconds without the Mac, the app performs them itself and does not wait the next times). The requests then leave from the Mac, with its network (VPN, proxy, IP address). Turn "Activate mocks" off in RCProxy Desktop to have every request sent as it is.
 
 ## ▼ Upgrading from 3.x
 + iOS 17 / tvOS 17 are now required.

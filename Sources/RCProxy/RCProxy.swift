@@ -14,7 +14,7 @@ import RCProxyCore
 public final class RCProxy {
 
     /// The version of the library.
-    public static let version = "4.0.0"
+    public static let version = "4.1.0"
 
     public enum StorageType: Sendable {
         /// Stores request in a singleton. The requests will be available

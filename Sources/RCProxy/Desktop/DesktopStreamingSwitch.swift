@@ -58,8 +58,9 @@ struct DesktopStreamingSwitch: View {
             return "Turn on to watch the requests live on your Mac."
         case .waiting:
             return "Visible to RCProxy Desktop. Connect from your Mac."
-        case .connected(let computers):
-            return "Streaming to \(computers.joined(separator: ", "))"
+        case .connected(let computers, let executing):
+            let names = computers.joined(separator: ", ")
+            return executing ? "Streaming to \(names), which runs the requests" : "Streaming to \(names)"
         case .failed(let message):
             return message
         }

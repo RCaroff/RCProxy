@@ -17,8 +17,9 @@ package final class RemoteAdvertiser: NSObject, @unchecked Sendable {
 
     package enum Status: Sendable, Equatable {
         case stopped
-        /// Discoverable. `viewers` holds the names of the connected viewers.
-        case advertising(viewers: [String])
+        /// Discoverable. `viewers` holds the names of the connected viewers, `executors` the names
+        /// of those that perform the requests of the app.
+        case advertising(viewers: [String], executors: [String] = [])
         case failed(String)
     }
 
@@ -46,6 +47,9 @@ package final class RemoteAdvertiser: NSObject, @unchecked Sendable {
         let viewer: RemoteViewerInfo
         var isConnected = false
         var isReady = false
+        /// The viewer asked to perform the requests of the app.
+        var executes = false
+        var assembler = RemoteFrameAssembler()
 
         init(session: MCSession, peer: MCPeerID, viewer: RemoteViewerInfo) {
             self.session = session
@@ -63,6 +67,13 @@ package final class RemoteAdvertiser: NSObject, @unchecked Sendable {
     private var advertiser: MCNearbyServiceAdvertiser?
     private var links: [ObjectIdentifier: Link] = [:]
     private var failure: String?
+    private var executions: [String: Execution] = [:]
+
+    /// A request handed over to a viewer, waiting for its result.
+    private struct Execution {
+        let link: ObjectIdentifier
+        let completion: @Sendable (RemoteExecutionResult?) -> Void
+    }
 
     package init(device: RemoteDeviceInfo, handlers: Handlers) {
         self.device = device
@@ -100,8 +111,53 @@ package final class RemoteAdvertiser: NSObject, @unchecked Sendable {
                 link.session.disconnect()
             }
             links.removeAll()
+            abandonExecutions { _ in true }
             failure = nil
             publishStatus()
+        }
+    }
+
+    // MARK: Delegated requests
+
+    /// Hands a request over to a viewer that asked to perform the requests of the app.
+    ///
+    /// `completion` is called exactly once, on a private queue: with the result, or with `nil` when no
+    /// viewer performs the requests, when the viewer goes away, or when it does not answer in time.
+    /// On `nil`, the app must perform the request itself.
+    package func execute(_ request: RemoteExecutionRequest, completion: @escaping @Sendable (RemoteExecutionResult?) -> Void) {
+        queue.async { [self] in
+            guard let (key, link) = links.first(where: { $0.value.isConnected && $0.value.executes }),
+                  let frames = try? RemoteFrameCodec.encode(.execute(request)) else {
+                completion(nil)
+                return
+            }
+            executions[request.id] = Execution(link: key, completion: completion)
+            send(frames, over: link)
+
+            // The viewer enforces the timeout of the request. This only covers a viewer that stopped answering.
+            let id = request.id
+            queue.asyncAfter(deadline: .now() + max(1, request.timeout) + Self.answerGracePeriod) { [self] in
+                executions.removeValue(forKey: id)?.completion(nil)
+            }
+        }
+    }
+
+    /// Tells the viewer that the result of a request is not expected anymore. `completion` is not called.
+    package func cancelExecution(id: String) {
+        queue.async { [self] in
+            guard let execution = executions.removeValue(forKey: id), let link = links[execution.link] else { return }
+            send(.cancelExecution(id: id), over: link)
+        }
+    }
+
+    /// Seconds granted to a viewer, on top of the timeout of a request, before the app takes the request back.
+    private static let answerGracePeriod: TimeInterval = 10
+
+    /// Gives the pending requests of some links back to the app.
+    private func abandonExecutions(where predicate: (ObjectIdentifier) -> Bool) {
+        for (id, execution) in executions where predicate(execution.link) {
+            executions[id] = nil
+            execution.completion(nil)
         }
     }
 
@@ -166,7 +222,11 @@ package final class RemoteAdvertiser: NSObject, @unchecked Sendable {
         } else if advertiser == nil {
             status = .stopped
         } else {
-            status = .advertising(viewers: links.values.filter { $0.isConnected }.map { $0.viewer.name }.sorted())
+            let connected = links.values.filter { $0.isConnected }
+            status = .advertising(
+                viewers: connected.map { $0.viewer.name }.sorted(),
+                executors: connected.filter { $0.executes }.map { $0.viewer.name }.sorted()
+            )
         }
         handlers.statusDidChange(status)
     }
@@ -234,6 +294,7 @@ extension RemoteAdvertiser: MCSessionDelegate {
             case .notConnected:
                 link.session.delegate = nil
                 links[key] = nil
+                abandonExecutions { $0 == key }
                 publishStatus()
             case .connecting:
                 break
@@ -243,7 +304,28 @@ extension RemoteAdvertiser: MCSessionDelegate {
         }
     }
 
-    package func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {}
+    package func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
+        let key = ObjectIdentifier(session)
+        queue.async { [self] in
+            guard let link = links[key], let message = link.assembler.ingest(data) else { return }
+            switch message {
+            case .delegation(let enabled):
+                guard link.executes != enabled else { return }
+                link.executes = enabled
+                if !enabled {
+                    abandonExecutions { $0 == key }
+                }
+                publishStatus()
+            case .executionResult(let result):
+                guard let execution = executions[result.id], execution.link == key else { return }
+                executions[result.id] = nil
+                execution.completion(result)
+            case .hello, .upsert, .execute, .cancelExecution:
+                // Device → viewer messages: nothing to do with them here.
+                break
+            }
+        }
+    }
 
     package func session(
         _ session: MCSession,

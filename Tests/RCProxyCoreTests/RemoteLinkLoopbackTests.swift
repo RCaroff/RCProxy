@@ -166,6 +166,106 @@ final class RemoteLinkLoopbackTests: XCTestCase {
         XCTAssertTrue(statuses.withLock { $0.contains(.advertising(viewers: ["Loopback Viewer"])) })
     }
 
+    /// The viewer asks to perform the requests of the device: the device hands them over and gets the answers.
+    func testViewerPerformsTheRequestsOfTheDevice() async throws {
+        let device = RemoteDeviceInfo(
+            id: "device-\(UUID().uuidString)", name: "Delegating Device", model: "Apple TV", systemName: "tvOS",
+            systemVersion: "17.0", appName: "Loopback Tests", appIdentifier: "com.example.loopback",
+            appVersion: "1.0 (1)", libraryVersion: "4.1.0", isSimulator: true
+        )
+        let statuses = OSAllocatedUnfairLock<[RemoteAdvertiser.Status]>(initialState: [])
+        let advertiser = RemoteAdvertiser(device: device, handlers: .init(
+            shouldAccept: { _ in true },
+            viewerDidConnect: { _ in },
+            statusDidChange: { status in statuses.withLock { $0.append(status) } }
+        ))
+        let browser = RemoteBrowser(viewerID: "viewer-\(UUID().uuidString)", viewerName: "Executing Viewer")
+        let log = EventLog()
+        let collector = Task {
+            for await event in browser.events { log.append(event) }
+        }
+        defer {
+            collector.cancel()
+            browser.stop()
+            advertiser.stop()
+        }
+
+        /// Hands a request over and waits for what comes back.
+        @Sendable func execute(_ request: RemoteExecutionRequest) async -> RemoteExecutionResult? {
+            await withCheckedContinuation { continuation in
+                advertiser.execute(request) { continuation.resume(returning: $0) }
+            }
+        }
+        func waitForExecutors(_ expected: [String]) async -> Bool {
+            let deadline = Date().addingTimeInterval(10)
+            while Date() < deadline {
+                if case .advertising(_, let executors) = statuses.withLock({ $0.last }), executors == expected { return true }
+                try? await Task.sleep(nanoseconds: 50_000_000)
+            }
+            return false
+        }
+
+        // Nobody connected: the device keeps its requests.
+        advertiser.start()
+        let kept = await execute(RemoteExecutionRequest(id: "alone", url: "https://example.com", method: "GET"))
+        XCTAssertNil(kept)
+
+        browser.setExecutesRequests(true)
+        browser.start()
+        let found = await log.wait(timeout: 15) { event -> Bool? in
+            if case .deviceFound(let found) = event, found.id == device.id { return true }
+            return nil
+        }
+        guard found == true else {
+            throw XCTSkip("The device was not discovered: Bonjour seems unavailable in this environment.")
+        }
+        browser.connect(toDeviceWithID: device.id, pairingCode: "1234")
+        let executing = await waitForExecutors(["Executing Viewer"])
+        XCTAssertTrue(executing, "The device should learn that the viewer performs its requests")
+
+        // The request reaches the viewer as it is, large body included, and the answer comes back.
+        let body = Data((0..<200_000).map { UInt8(truncatingIfNeeded: $0) })
+        let request = RemoteExecutionRequest(
+            id: "delegated", url: "https://example.com/upload?x=1", method: "POST",
+            headers: ["Content-Type": "application/octet-stream"], body: body, timeout: 30
+        )
+        async let answer = execute(request)
+        let received = await log.wait(timeout: 15) { event -> RemoteExecutionRequest? in
+            if case .execute(let request, let deviceID) = event, deviceID == device.id { return request }
+            return nil
+        }
+        XCTAssertEqual(received, request)
+        let result = RemoteExecutionResult(id: "delegated", statusCode: 201, headers: ["X-Mock": "1"], body: Data("{}".utf8))
+        browser.respond(result, toDeviceWithID: device.id)
+        let answered = await answer
+        XCTAssertEqual(answered, result)
+
+        // A cancelled request is announced to the viewer, and its completion is never called.
+        advertiser.execute(RemoteExecutionRequest(id: "cancelled", url: "https://example.com", method: "GET")) { _ in
+            XCTFail("A cancelled request has no result")
+        }
+        advertiser.cancelExecution(id: "cancelled")
+        let cancelled = await log.wait(timeout: 10) { event -> Bool? in
+            if case .cancelExecution(let id, _) = event, id == "cancelled" { return true }
+            return nil
+        }
+        XCTAssertEqual(cancelled, true)
+
+        // The viewer gives up while a request is pending: the device gets it back, and keeps the next ones.
+        async let abandoned = execute(RemoteExecutionRequest(id: "abandoned", url: "https://example.com", method: "GET"))
+        _ = await log.wait(timeout: 10) { event -> Bool? in
+            if case .execute(let request, _) = event, request.id == "abandoned" { return true }
+            return nil
+        }
+        browser.setExecutesRequests(false)
+        let givenBack = await abandoned
+        XCTAssertNil(givenBack)
+        let stopped = await waitForExecutors([])
+        XCTAssertTrue(stopped)
+        let keptAgain = await execute(RemoteExecutionRequest(id: "after", url: "https://example.com", method: "GET"))
+        XCTAssertNil(keptAgain)
+    }
+
     func testDeclinedViewerDoesNotReceiveAnything() async throws {
         let device = RemoteDeviceInfo(
             id: "device-\(UUID().uuidString)", name: "Private Device", model: "Apple TV", systemName: "tvOS",
